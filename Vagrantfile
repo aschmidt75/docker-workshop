@@ -66,6 +66,29 @@ rake spec
 
 EOS
 
+    # Install fig via pip
+    s.vm.provision 'shell', inline: <<EOS
+echo == Ensure fig is installed
+PIP_=$(which pip)
+if [[ -z $PIP_ ]]; then
+	sudo apt-get -yqq install python-pip
+fi
+pip --version
+FIG_=$(which fig)
+if [[ -z $FIG_ ]]; then
+	pip install fig
+fi
+fig --version
+EOS
+
+    # download and unpack docker squash
+    # https://github.com/jwilder/docker-squash
+    s.vm.provision 'shell', inline: <<EOS
+wget https://github.com/jwilder/docker-squash/releases/download/v0.0.8/docker-squash-linux-amd64-v0.0.8.tar.gz
+sudo tar -C /usr/local/bin -xzvf docker-squash-linux-amd64-v0.0.8.tar.gz
+rm docker-squash-linux-amd64-v0.0.8.tar.gz
+EOS
+
   end
   
 end
