@@ -89,6 +89,11 @@ sudo tar -C /usr/local/bin -xzvf docker-squash-linux-amd64-v0.0.8.tar.gz
 rm docker-squash-linux-amd64-v0.0.8.tar.gz
 EOS
 
+    # download and set up registry
+    s.vm.provision 'shell', inline: <<EOS
+sudo docker pull registry
+EOS
+
   end
   
 end
