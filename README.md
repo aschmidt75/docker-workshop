@@ -1,11 +1,24 @@
 docker-workshop
 =========================
 
-Vagrant, puppet, docker, serverspec
-Work environment for out docker workshop
+includes
 
-Andreas Schmidt
-Peter Roßbach
+ * Puppet module garethr/puppet, manages
+ * demo user (pwd: demo) in docker group w/ sudo
+ * bridge utils
+ * apache2 installed and running
+ * nsenter
+ * fig
+ * docker-squash
+ * docker registry
+   * configured as mirror-proxy to public docker hub
+   * contains images for ubuntu:latest and busybox:latest
+ * serverspec
+   * spec for all items above 
+ * ufw is stopped
+
+todos:
+ * apache2 does not yet serve files from /data/static
 
 License
 =======

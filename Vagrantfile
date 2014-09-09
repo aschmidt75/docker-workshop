@@ -47,25 +47,6 @@ if [[ -z `which nsenter` ]]; then
 fi
 EOS
 
-    # install & run serverspec
-    s.vm.provision 'shell', inline: <<EOS
-( sudo gem list --local | grep -q rake ) || {
-	sudo gem install rake -v '10.3.2' --no-ri --no-rdoc
-}
-( sudo gem list --local | grep -q rspec ) || {
-	sudo gem install rspec -v '2.99.0' --no-ri --no-rdoc
-}
-( sudo gem list --local | grep -q specinfra ) || {
-	sudo gem install specinfra -v '1.21.0' --no-ri --no-rdoc
-}
-( sudo gem list --local | grep -q serverspec ) || {
-	sudo gem install serverspec -v '1.10.0' --no-ri --no-rdoc
-}
-cd /mnt/spec.d
-rake spec
-
-EOS
-
     # Install fig via pip
     s.vm.provision 'shell', inline: <<EOS
 echo == Ensure fig is installed
@@ -84,14 +65,74 @@ EOS
     # download and unpack docker squash
     # https://github.com/jwilder/docker-squash
     s.vm.provision 'shell', inline: <<EOS
-wget https://github.com/jwilder/docker-squash/releases/download/v0.0.8/docker-squash-linux-amd64-v0.0.8.tar.gz
-sudo tar -C /usr/local/bin -xzvf docker-squash-linux-amd64-v0.0.8.tar.gz
-rm docker-squash-linux-amd64-v0.0.8.tar.gz
+DS_=$(which docker-squash)    
+if [[ -z $DS_ ]]; then
+	wget https://github.com/jwilder/docker-squash/releases/download/v0.0.8/docker-squash-linux-amd64-v0.0.8.tar.gz
+	sudo tar -C /usr/local/bin -xzvf docker-squash-linux-amd64-v0.0.8.tar.gz
+	rm docker-squash-linux-amd64-v0.0.8.tar.gz
+fi
 EOS
 
     # download and set up registry
     s.vm.provision 'shell', inline: <<EOS
-sudo docker pull registry
+docker images | grep -wq -E '^registry' || sudo docker pull registry:latest
+
+if [[ ! -d /data ]]; then 
+	sudo mkdir /data
+	sudo chmod -R g+wx /data
+	sudo chgrp -R vagrant /data
+fi
+if [[ ! -d /data/registry ]]; then
+	sudo mkdir /data/registry
+	sudo chgrp -R docker /data/registry
+fi
+if [[ ! -d /data/static_images ]]; then
+	sudo mkdir /data/static_images
+	sudo chgrp -R vagrant /data/static_images
+fi
+#if [[ ! -f /data/static_images/registry-latest-image.tar ]]; then
+#	echo saving image ...
+#	sudo docker save -o /data/static_images/registry-latest-image.tar registry
+#	sudo chown vagrant. /data/static_images/registry-latest-image.tar
+#fi
+
+touch /usr/local/bin/start_registry.sh
+chmod +x /usr/local/bin/start_registry.sh
+echo '#!/bin/bash' >/usr/local/bin/start_registry.sh
+echo 'docker run -d -p 127.0.0.1:5000:5000 -u root -v /data/registry:/data -e STORAGE_PATH=/data -e MIRROR_SOURCE=https://registry-1.docker.io -e MIRROR_SOURCE_INDEX=https://index.docker.io --name registry registry' >>/usr/local/bin/start_registry.sh
+
+#
+(docker ps registry | grep -wq registry.*Up) || /usr/local/bin/start_registry.sh
+
+EOS
+
+    # pull demo image(s) through our private registry
+    s.vm.provision 'shell', inline: <<EOS
+docker pull 127.0.0.1:5000/ubuntu:14.04
+docker tag 127.0.0.1:5000/ubuntu:14.04 ubuntu:14.04
+docker tag 127.0.0.1:5000/ubuntu:14.04 ubuntu:latest
+docker pull 127.0.0.1:5000/busybox:latest
+docker tag 127.0.0.1:5000/busybox:latest busybox:latest
+EOS
+
+
+    # install & run serverspec
+    s.vm.provision 'shell', inline: <<EOS
+( sudo gem list --local | grep -q rake ) || {
+	sudo gem install rake -v '10.3.2' --no-ri --no-rdoc
+}
+( sudo gem list --local | grep -q rspec ) || {
+	sudo gem install rspec -v '2.99.0' --no-ri --no-rdoc
+}
+( sudo gem list --local | grep -q specinfra ) || {
+	sudo gem install specinfra -v '1.21.0' --no-ri --no-rdoc
+}
+( sudo gem list --local | grep -q serverspec ) || {
+	sudo gem install serverspec -v '1.10.0' --no-ri --no-rdoc
+}
+cd /mnt/spec.d
+rake spec
+
 EOS
 
   end

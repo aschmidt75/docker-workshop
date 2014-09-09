@@ -29,3 +29,10 @@ describe 'We should have nsenter installed' do
 	end
 end
 
+describe 'We should have docker-squash installed' do
+	describe file '/usr/local/bin/docker-squash' do
+		it { should be_file }
+		it { should be_executable }
+	end
+end
+

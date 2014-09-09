@@ -70,6 +70,8 @@ end
 describe 'Workshop image(s) should be present' do
 	describe command 'docker images' do
 		its(:stdout) { should match /ubuntu.*14.04/ }
+		its(:stdout) { should match /busybox/ }
+		its(:stdout) { should match /registry/ }
 	end
 end
 
