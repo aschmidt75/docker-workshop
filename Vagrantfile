@@ -13,7 +13,29 @@ Vagrant.configure("2") do |config|
     s.vm.synced_folder "spec.d/", "/mnt/spec.d"
 
     s.vm.provision "shell", inline:
-	    'sudo su - -c "killall -9 apt-get; apt-get update -yqq"'
+	    'sudo su - -c "killall -9 apt-get >/dev/null 2>&1; apt-get update -yqq"'
+
+    # -- PART Microservices
+    # download stuff we need as packages, so we do not need
+    # wifi during the workshop
+    s.vm.provision 'shell', inline: <<EOS
+if [[ ! -d /data ]]; then 
+	sudo mkdir /data
+	sudo chmod -R g+wx /data
+	sudo chgrp -R vagrant /data
+fi
+if [[ ! -d /data/packages ]]; then
+	sudo mkdir /data/packages
+	sudo chmod a+rwx /data/packages
+fi
+which wget || sudo apt-get install wget
+set -x
+sudo apt-get --print-uris --yes install apache2 | grep -E "http" | tr -d "\'" >/tmp/apache2-pkglist
+cd /data/packages
+wget --input-file /tmp/apache2-pkglist
+set +x
+
+EOS
 
     # install puppet module for docker
     # image already contains puppet
@@ -90,11 +112,6 @@ if [[ ! -d /data/static_images ]]; then
 	sudo mkdir /data/static_images
 	sudo chgrp -R vagrant /data/static_images
 fi
-#if [[ ! -f /data/static_images/registry-latest-image.tar ]]; then
-#	echo saving image ...
-#	sudo docker save -o /data/static_images/registry-latest-image.tar registry
-#	sudo chown vagrant. /data/static_images/registry-latest-image.tar
-#fi
 
 touch /usr/local/bin/start_registry.sh
 chmod +x /usr/local/bin/start_registry.sh
@@ -103,6 +120,7 @@ echo 'docker run -d -p 127.0.0.1:5000:5000 -u root -v /data/registry:/data -e ST
 
 #
 (docker ps registry | grep -wq registry.*Up) || /usr/local/bin/start_registry.sh
+sleep 10
 
 EOS
 
@@ -114,7 +132,6 @@ docker tag 127.0.0.1:5000/ubuntu:14.04 ubuntu:latest
 docker pull 127.0.0.1:5000/busybox:latest
 docker tag 127.0.0.1:5000/busybox:latest busybox:latest
 EOS
-
 
     # install & run serverspec
     s.vm.provision 'shell', inline: <<EOS
@@ -130,9 +147,10 @@ EOS
 ( sudo gem list --local | grep -q serverspec ) || {
 	sudo gem install serverspec -v '1.10.0' --no-ri --no-rdoc
 }
+EOS
+    s.vm.provision 'shell', inline: <<EOS
 cd /mnt/spec.d
 rake spec
-
 EOS
 
   end
