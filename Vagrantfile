@@ -97,6 +97,7 @@ EOS
 
     # download and set up registry
     s.vm.provision 'shell', inline: <<EOS
+sysctl vm.overcommit_memory=1
 docker images | grep -wq -E '^registry' || sudo docker pull registry:latest
 
 if [[ ! -d /data ]]; then 
@@ -131,6 +132,28 @@ docker tag 127.0.0.1:5000/ubuntu:14.04 ubuntu:14.04
 docker tag 127.0.0.1:5000/ubuntu:14.04 ubuntu:latest
 docker pull 127.0.0.1:5000/busybox:latest
 docker tag 127.0.0.1:5000/busybox:latest busybox:latest
+docker pull 127.0.0.1:5000/rossbachp/tomcat8
+docker tag 127.0.0.1:5000/rossbachp/tomcat8:latest rossbachp/tomcat8:latest
+docker pull 127.0.0.1:5000/rossbachp/jre8
+docker tag 127.0.0.1:5000/rossbachp/jre:latest rossbachp/jre:latest
+EOS
+
+    # get us some etcd
+    s.vm.provision 'shell', inline: <<EOS
+if [[ ! -x /usr/local/bin/etcd ]]; then 
+	cd /tmp
+	mkdir etcd-install
+	cd etcd-install
+	wget https://github.com/coreos/etcd/releases/download/v0.4.6/etcd-v0.4.6-linux-amd64.tar.gz
+	tar xfvz etcd-v0.4.6-linux-amd64.tar.gz
+	sudo cp etcd-v0.4.6-linux-amd64/etcd /usr/local/bin
+	sudo cp etcd-v0.4.6-linux-amd64/etcdctl /usr/local/bin
+	# start etcd
+	touch /usr/local/bin/start_etcd.sh
+	chmod +x /usr/local/bin/start_etcd.sh
+	echo 'sudo su - -c "killall etcd; /usr/local/bin/etcd -v >/var/log/etcd.log 2>&1 &" ' >/usr/local/bin/start_etcd.sh
+fi
+/usr/local/bin/start_etcd.sh
 EOS
 
     # install & run serverspec
