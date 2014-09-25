@@ -30,8 +30,11 @@ if [[ ! -d /data/packages ]]; then
 fi
 which wget || sudo apt-get install wget
 set -x
-sudo apt-get --print-uris --yes install apache2 | grep -E "http" | tr -d "\'" >/tmp/apache2-pkglist
+>/tmp/apache2-pkglist
+sudo apt-get --print-uris --yes download apache2 | grep -E "http" | tr -d "\'" | awk '{ print $1 }' >>/tmp/apache2-pkglist
+sudo apt-get --print-uris --yes download libapache2-mod-jk | grep -E "http" | tr -d "\'" | awk '{ print $1 }'>>/tmp/apache2-pkglist
 cd /data/packages
+cat /tmp/apache2-pkglist
 wget --input-file /tmp/apache2-pkglist
 set +x
 
@@ -134,8 +137,6 @@ docker pull 127.0.0.1:5000/busybox:latest
 docker tag 127.0.0.1:5000/busybox:latest busybox:latest
 docker pull 127.0.0.1:5000/rossbachp/tomcat8
 docker tag 127.0.0.1:5000/rossbachp/tomcat8:latest rossbachp/tomcat8:latest
-docker pull 127.0.0.1:5000/rossbachp/jre8
-docker tag 127.0.0.1:5000/rossbachp/jre:latest rossbachp/jre:latest
 EOS
 
     # get us some etcd
