@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
 
   # Ubuntu 14.04 (trusty tahr, 64bit)
   config.vm.box 	= 'trusty64'
-  config.vm.box_url 	= "http://cloud-images.ubuntu.com/vagrant/trusty/20140723/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+  config.vm.box_url 	= "http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
   config.vm.hostname 	= 'docker-workshop'
 
   config.vm.define "docker-workshop-vm", primary: true do |s|
@@ -154,6 +154,23 @@ if [[ ! -x /usr/local/bin/etcd ]]; then
 	echo 'sudo su - -c "killall etcd; /usr/local/bin/etcd -v >/var/log/etcd.log 2>&1 &" ' >/usr/local/bin/start_etcd.sh
 fi
 /usr/local/bin/start_etcd.sh
+EOS
+
+    # and progriums' registrator as well
+    s.vm.provision 'shell', inline: <<EOS
+if [[ ! -x /usr/local/bin/registrator ]]; then 
+	cd /tmp
+	mkdir registrator-install
+	cd registrator-install
+	git clone https://github.com/progrium/registrator
+	sudo cp registrator/stage/registrator /usr/local/bin
+	# start 
+	touch /usr/local/bin/start_registrator.sh
+	chmod +x /usr/local/bin/start_registrator.sh
+	echo 'sudo su - -c "killall registrator; /usr/local/bin/registrator etcd:///registrator >/var/log/registrator.log 2>&1 &" ' >/usr/local/bin/start_registrator.sh
+fi
+/usr/local/bin/start_registrator.sh
+
 EOS
 
     # install & run serverspec
