@@ -18,6 +18,13 @@ describe 'We should have apache installed and running' do
 	end
 end
 
+describe 'We should have apache2 packages downloaded' do
+	describe command('ls -al /data/packages/*.deb') do
+		its(:stdout) { should match /mod-jk/ }
+		its(:stdout) { should match /apache2_2/ }
+	end
+end
+
 describe 'We should have nsenter installed' do
 	describe file '/usr/local/bin/nsenter' do
 		it { should be_file }

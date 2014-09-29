@@ -13,9 +13,13 @@ includes
  * docker registry
    * configured as mirror-proxy to public docker hub
    * contains images for ubuntu:latest and busybox:latest
+   * demo images from rossbachp
  * serverspec
    * spec for all items above 
+ * etcd
+ * registrator from progrium
  * ufw is stopped
+ 
 
 todos:
  * apache2 does not yet serve files from /data/static

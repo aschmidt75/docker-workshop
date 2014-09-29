@@ -11,6 +11,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "docker-workshop-vm", primary: true do |s|
     # mount our specs into vm, run serverspec locally
     s.vm.synced_folder "spec.d/", "/mnt/spec.d"
+    s.vm.synced_folder "suppl/", "/mnt/suppl"
 
     s.vm.provision "shell", inline:
 	    'sudo su - -c "killall -9 apt-get >/dev/null 2>&1; apt-get update -yqq"'
@@ -31,8 +32,9 @@ fi
 which wget || sudo apt-get install wget
 set -x
 >/tmp/apache2-pkglist
-sudo apt-get --print-uris --yes download apache2 | grep -E "http" | tr -d "\'" | awk '{ print $1 }' >>/tmp/apache2-pkglist
-sudo apt-get --print-uris --yes download libapache2-mod-jk | grep -E "http" | tr -d "\'" | awk '{ print $1 }'>>/tmp/apache2-pkglist
+for p in apache2 apache2-bin apache2-data libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap ssl-cert libapache2-mod-jk openssl libldap-2.4-2 apache2-api-20120211 libxml2 libgssapi3-heimdal libsasl2-2 libsasl2-modules-db libasn1-8-heimdal libhcrypto4-heimdal libheimntlm0-heimdal libkrb5-26-heimdal libroken18-heimdal libheimbase1-heimdal libhx509-5-heimdal libwind0-heimdal; do
+	sudo apt-get --print-uris --yes download $p | grep -E "http" | tr -d "\'" | awk '{ print $1 }' >>/tmp/apache2-pkglist
+done
 cd /data/packages
 cat /tmp/apache2-pkglist
 wget --input-file /tmp/apache2-pkglist
@@ -168,7 +170,7 @@ if [[ ! -x /usr/local/bin/registrator ]]; then
 	# start 
 	touch /usr/local/bin/start_registrator.sh
 	chmod +x /usr/local/bin/start_registrator.sh
-	echo 'sudo su - -c "killall registrator; /usr/local/bin/registrator etcd:///registrator >/var/log/registrator.log 2>&1 &" ' >/usr/local/bin/start_registrator.sh
+	echo 'sudo su - -c "killall registrator; /usr/local/bin/registrator etcd:///tomcat8 >/var/log/registrator.log 2>&1 &" ' >/usr/local/bin/start_registrator.sh
 fi
 /usr/local/bin/start_registrator.sh
 
