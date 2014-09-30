@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'It should have docker installed' do
-	describe package 'lxc-docker-1.1.2' do
+	describe package 'lxc-docker-1.2.0' do
 		it { should be_installed }
 	end
 
@@ -16,7 +16,7 @@ describe 'It should have docker installed' do
 	end
 
 	describe command 'docker -v' do
-		its(:stdout) { should match '^Docker version 1\.1\.2.*' }
+		its(:stdout) { should match '^Docker version 1\.2.*' }
  	end
 end
 
