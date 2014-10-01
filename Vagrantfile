@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
     # mount our specs into vm, run serverspec locally
     s.vm.synced_folder "spec.d/", "/mnt/spec.d"
     s.vm.synced_folder "docker.d/", "/mnt/docker.d"
-    s.vm.synced_folder "suppl/dynupd-etc-registrator", "/mnt/dynupd"
+    s.vm.synced_folder "suppl/dynupd-etcd-registrator", "/mnt/dynupd"
 
     s.vm.provider "virtualbox" do |vb|
     	vb.gui = false
