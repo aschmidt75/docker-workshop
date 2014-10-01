@@ -11,7 +11,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "docker-workshop-vm", primary: true do |s|
     # mount our specs into vm, run serverspec locally
     s.vm.synced_folder "spec.d/", "/mnt/spec.d"
-    s.vm.synced_folder "suppl/", "/mnt/suppl"
+    s.vm.synced_folder "docker.d/", "/mnt/docker.d"
 
     s.vm.provision "shell", inline:
 	    'sudo su - -c "killall -9 apt-get >/dev/null 2>&1; apt-get update -yqq"'
@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
     # download stuff we need as packages, so we do not need
     # wifi during the workshop
     s.vm.provision 'shell', inline: <<EOS
-if [[ ! -d /data ]]; then 
+if [[ ! -d /data ]]; then
 	sudo mkdir /data
 	sudo chmod -R g+wx /data
 	sudo chgrp -R vagrant /data
@@ -62,7 +62,7 @@ EOS
     # install nsenter
     # from: https://blog.codecentric.de/2014/07/vier-wege-in-den-docker-container/
     s.vm.provision 'shell', inline: <<EOS
-if [[ -z `which nsenter` ]]; then 
+if [[ -z `which nsenter` ]]; then
 	TMPDIR=`mktemp -d` && {
 		cd $TMPDIR
 		curl --silent https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.tar.gz | tar -zxf-
@@ -93,7 +93,7 @@ EOS
     # download and unpack docker squash
     # https://github.com/jwilder/docker-squash
     s.vm.provision 'shell', inline: <<EOS
-DS_=$(which docker-squash)    
+DS_=$(which docker-squash)
 if [[ -z $DS_ ]]; then
 	wget https://github.com/jwilder/docker-squash/releases/download/v0.0.8/docker-squash-linux-amd64-v0.0.8.tar.gz
 	sudo tar -C /usr/local/bin -xzvf docker-squash-linux-amd64-v0.0.8.tar.gz
@@ -106,7 +106,7 @@ EOS
 sysctl vm.overcommit_memory=1
 docker images | grep -wq -E '^registry' || sudo docker pull registry:latest
 
-if [[ ! -d /data ]]; then 
+if [[ ! -d /data ]]; then
 	sudo mkdir /data
 	sudo chmod -R g+wx /data
 	sudo chgrp -R vagrant /data
@@ -144,7 +144,7 @@ EOS
 
     # get us some etcd
     s.vm.provision 'shell', inline: <<EOS
-if [[ ! -x /usr/local/bin/etcd ]]; then 
+if [[ ! -x /usr/local/bin/etcd ]]; then
 	cd /tmp
 	mkdir etcd-install
 	cd etcd-install
@@ -162,13 +162,13 @@ EOS
 
     # and progriums' registrator as well
     s.vm.provision 'shell', inline: <<EOS
-if [[ ! -x /usr/local/bin/registrator ]]; then 
+if [[ ! -x /usr/local/bin/registrator ]]; then
 	cd /tmp
 	mkdir registrator-install
 	cd registrator-install
 	git clone https://github.com/progrium/registrator
 	sudo cp registrator/stage/registrator /usr/local/bin
-	# start 
+	# start
 	touch /usr/local/bin/start_registrator.sh
 	chmod +x /usr/local/bin/start_registrator.sh
 	echo 'sudo su - -c "killall registrator; /usr/local/bin/registrator etcd:///tomcat8 >/var/log/registrator.log 2>&1 &" ' >/usr/local/bin/start_registrator.sh
@@ -198,5 +198,5 @@ rake spec
 EOS
 
   end
-  
+
 end
