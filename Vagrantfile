@@ -12,6 +12,13 @@ Vagrant.configure("2") do |config|
     # mount our specs into vm, run serverspec locally
     s.vm.synced_folder "spec.d/", "/mnt/spec.d"
     s.vm.synced_folder "docker.d/", "/mnt/docker.d"
+    s.vm.synced_folder "suppl/dynupd-etc-registrator", "/mnt/dynupd"
+
+    s.vm.provider "virtualbox" do |vb|
+    	vb.gui = false
+        vb.customize [ "modifyvm", :id, "--memory", "1024"]
+        vb.customize [ "modifyvm", :id, "--cpus", "1"]
+    end
 
     s.vm.provision "shell", inline:
 	    'sudo su - -c "killall -9 apt-get >/dev/null 2>&1; apt-get update -yqq"'
@@ -155,7 +162,7 @@ if [[ ! -x /usr/local/bin/etcd ]]; then
 	# start etcd
 	touch /usr/local/bin/start_etcd.sh
 	chmod +x /usr/local/bin/start_etcd.sh
-	echo 'sudo su - -c "killall etcd; /usr/local/bin/etcd -v >/var/log/etcd.log 2>&1 &" ' >/usr/local/bin/start_etcd.sh
+	echo 'sudo su - -c "killall etcd >/dev/null 2>&1; /usr/local/bin/etcd -v >/var/log/etcd.log 2>&1 &" ' >/usr/local/bin/start_etcd.sh
 fi
 /usr/local/bin/start_etcd.sh
 EOS
@@ -171,7 +178,7 @@ if [[ ! -x /usr/local/bin/registrator ]]; then
 	# start
 	touch /usr/local/bin/start_registrator.sh
 	chmod +x /usr/local/bin/start_registrator.sh
-	echo 'sudo su - -c "killall registrator; /usr/local/bin/registrator etcd:///tomcat8 >/var/log/registrator.log 2>&1 &" ' >/usr/local/bin/start_registrator.sh
+	echo 'sudo su - -c "killall registrator >/dev/null 2>&1; /usr/local/bin/registrator etcd:///tomcat8 >/var/log/registrator.log 2>&1 &" ' >/usr/local/bin/start_registrator.sh
 fi
 /usr/local/bin/start_registrator.sh
 
