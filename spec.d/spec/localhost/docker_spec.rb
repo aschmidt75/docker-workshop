@@ -50,11 +50,11 @@ describe 'Docker should have networking set up' do
 	describe iptables, :sudo => true do
 		  it { should have_rule('-P POSTROUTING ACCEPT').
 	 		with_table('nat').
-			with_chain('POSTROUTING') 
+			with_chain('POSTROUTING')
 		  }
-		  it { should have_rule('-A POSTROUTING -s 172.17.0.0/16 ! -d 172.17.0.0/16 -j MASQUERADE').
+		  it { should have_rule('-A POSTROUTING -s 172.17.0.0/16 ! -o docker0 -j MASQUERADE').
 	 		with_table('nat').
-			with_chain('POSTROUTING') 
+			with_chain('POSTROUTING')
 		  }
 	end
 
@@ -74,4 +74,3 @@ describe 'Workshop image(s) should be present' do
 		its(:stdout) { should match /registry/ }
 	end
 end
-
