@@ -202,7 +202,8 @@ OK, we are do´nt configured and started the apache tomcat backends!
 $ docker stop apache2
 ```
 ---
-**ToDo** ADD picture ectd service discovery
+### Service Discovery with ETCD and Registrator to scale out!
+![](images/etcd-registrator-watch.png)
 
   * [etcd](https://github.com/coreos/etcd)
   * [registrator](https://github.com/progrium/registrator)
@@ -270,7 +271,28 @@ $ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
 [check Dockerbox tomcat 8  project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
 
 --
+### Design rossbachp/tomcat8 docker image
+
 ![](images/design-tomcat8-images.png)
+***
+You can deploy your own webapps and tomcat extended library with local volumes or better with a docker data container.
+
+[rossbachp/tomcat8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
+--
+## Goals
+
+  * use minimal ubuntu and java8 base images (work in progress)
+  * inject libs and wars as volumes (data container)
+  * deploy the manager app and generate password at start
+  * clean up installation and remove examples and unused `*.bat`, .. files.
+  * squash footprint and clean up build artefacts
+  * use a nicer access log pattern :-)
+  * use a cleanup server.xml without comments
+    * use separate executor
+    * setup HTTP (8080) and AJP (8009) connectors and expose ports
+    * currently not support APR Connectors or configure other then standard NIO
+  * reuse existing cool ideas from other nice guys. Many thanks;)
+
 
 ---
 ### Create worker.properties to access tomcat from httpd
