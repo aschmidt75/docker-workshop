@@ -357,6 +357,83 @@ stop tomcat a check!
 ```bash
 $ docker stop <tomcat container id>
 ```
+---
+### Tune the things
+
+  * better mod_jk config
+  * apache graceful restart
+
+--
+### Better mod_jk support
+
+  * switch watch.sh off!
+  * look at `get_modjk-workers-ectd-registrator-elegant.sh`
+  * open the container and config mod_jk
+    - patch
+  * commit new image apache2 again and start
+  * switch to `get_modjk-workers-ectd-registrator-elegant.sh`
+--
+### add jkstatus mapping
+
+```bash
+$ sudo /bin/bash
+$ docker-enter <apache container-id> /bin/bash`
+$ sed -i 's/<\/VirtualHost>/\n\tJkMountCopy ON\n<\/VirtualHost>/g' /etc/apache2/sites-enabled/000-default.conf
+$ sed -i 's/        Allow from 127.0.0.1/        Allow from 127.0.0.1 172.17.42.1/g' /etc/apache2/mods-enabled/jk.conf
+$ exit
+```
+--
+### graceful restart apache!
+
+```bash
+$ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
+$ sudo docker-enter $ID /bin/bash
+$ /bin/bash -c "source /etc/apache2/envvars && exec /usr/sbin/apachectl graceful"
+```
+
+check jk-status at your docker-workshop host
+```bash
+$ curl http://127.0.0.1:6000/jk-status?mime=prop
+```
+***
+Why worker host print localhost?
+
+```
+worker.worker.sick_davinci.host=localhost
+worker.worker.sick_davinci.port=8009
+worker.worker.sick_davinci.address=127.0.0.1:8009
+```
+--
+### commit apache image
+
+```bash
+$ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
+$ echo $ID
+9794b009031d
+$ docker stop $ID
+$ docker commit $ID apache2:0.2
+0a5a66dd5ae876b6e01ce454c4c3679d32b42980ffd97b42a2572fbb41b580f5
+$ docker images | grep apache2
+apache2  0.2  ae7da438a1ba  9 seconds ago  209.4 MB
+...
+```
+
+--
+## restart apache2
+```bash
+$ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
+$ docker stop $ID
+$ docker rm $ID
+$ docker run -d -ti \
+ -v /data/apache2-jk-config/workers.properties:\
+/etc/libapache2-mod-jk/workers.properties \
+ -v /data/apache2-log/:/var/log/apache2/ \
+ -p 127.0.0.1:6000:80   \
+ --name apache2 \
+ apache2:0.2 \
+ /bin/bash -c "source /etc/apache2/envvars && exec /usr/sbin/apache2 -D FOREGROUND"
+```
+
 
 ***
 FINISH this autoscaling httpd with tomcat lesson...
