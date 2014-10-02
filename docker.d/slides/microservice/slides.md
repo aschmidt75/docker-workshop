@@ -4,7 +4,7 @@
 * [<peter.rossbach@bee42.com>](mailto:peter.rossbach@bee42.com)
 
 ---
-## Start the apache installation inside fresh container
+## Start apache installation based upon a fresh container
 
 ```bash
 $ vagrant up
@@ -13,10 +13,10 @@ $ docker run -ti -v /data/packages:/mnt ubuntu /bin/bash
 root@26936f69cc5b:/#
 ```
 ***
-Yummie, know lets dance really __step by step__!
+Installation __step by step__
 
 --
-###  content of `/data/packages`
+### contents of `/data/packages`
 ```bash
 $ ls /data/packages
 apache2_2.4.7-1ubuntu4.1_amd64.deb
@@ -45,7 +45,7 @@ ssl-cert_1.0.33_all.deb
 ```
 
 --
-### Now install packages super fast from local disk!
+### Regular procedure would be a 'apt-get install ..', instead we'll install directly from .deb files.
 ```bash
 $ cd /mnt
 $ dpkg -i *.deb
@@ -90,14 +90,14 @@ Server compiled with....
 --
 ### configure apache mod_jk support
 
-add JkMount
+We need to add a JkMount instruction
 
 ```bash
 $ sed -i 's/<\/VirtualHost>/\n\tJkMount \/* loadbalancer\n<\/VirtualHost>/g' /etc/apache2/sites-enabled/000-default.conf
 ```
 --
 
-## Copy the worker properties - We must replace this wrong config :)
+## Copy the worker properties - We have to replace this config because it is wrong :)
 
 ```bash
 root@26936f69cc5b:/# grep -v '#' /etc/libapache2-mod-jk/workers.properties | sed '/^$/d'
@@ -127,7 +127,7 @@ $ touch workers.properties
 ```
 
 ---
-### Create an images from installed apache httpd container
+### Use `docker commit` to create an image from installed apache httpd container
 
 ```bash
 $ ID=$(docker ps -l | awk '/^[0-9a-f]/{print $1}')
@@ -148,7 +148,7 @@ docker rm $ID
 ```
 
 ---
-## Start apache form newly created image
+## Start apache from newly created image
 
 ```bash
 $ docker run -ti --rm \
@@ -168,7 +168,7 @@ JkMount /* loadbalancer
 $ exit
 ```
 --
-## really start the apache
+## start the apache container
 
 ```bash
 $ docker run -d -ti \
@@ -196,20 +196,20 @@ $ wget -O - http://0.0.0.0:6000/status
 ```
 
 ***
-OK, we are do´nt configured and started the apache tomcat backends!
+OK, we did configured und start our tomcat backends...
 
 ```bash
 $ docker stop apache2
 ```
 ---
-### Service Discovery with ETCD and Registrator to scale out!
+### Service Discovery with etcd and Registrator to scale out!
 ![](images/etcd-registrator-watch.png)
 
   * [etcd](https://github.com/coreos/etcd)
   * [registrator](https://github.com/progrium/registrator)
 
 --
-### start ectd + registrator at your docker host (SMELL)
+### start ectd + registrator on your docker host (SMELL)
 
 ```bash
 $ sudo /bin/bash
@@ -233,7 +233,7 @@ $ etcdctl ls /
 ```
 
 --
-### look at the scripts
+### looking at the scripts ...
 
 
 ```bash
@@ -268,29 +268,29 @@ $ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
 ```
 
 ***
-[check Dockerbox tomcat 8  project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
+[check Dockerbox tomcat 8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
 
 --
-### Design rossbachp/tomcat8 docker image
+### Design of rossbachp/tomcat8 docker image
 
 ![](images/design-tomcat8-images.png)
 ***
-You can deploy your own webapps and tomcat extended library with local volumes or better with a docker data container.
+You can deploy your own webapps and tomcat extended library with local volumes. Better alternative: by using a docker data container.
 
 [rossbachp/tomcat8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
 --
 ## Goals
 
   * use minimal ubuntu and java8 base images (work in progress)
-  * inject libs and wars as volumes (data container)
-  * deploy the manager app and generate password at start
-  * clean up installation and remove examples and unused `*.bat`, .. files.
+  * inject libs and .wars as volumes (hence the data container)
+  * deploy manager app and generate password at start
+  * clean up installation, remove examples and unused `*.bat`, .. files.
   * squash footprint and clean up build artefacts
   * use a nicer access log pattern :-)
-  * use a cleanup server.xml without comments
+  * use a cleaned up server.xml without comments
     * use separate executor
     * setup HTTP (8080) and AJP (8009) connectors and expose ports
-    * currently not support APR Connectors or configure other then standard NIO
+    * currently do not support APR Connectors or configure other then standard NIO
   * reuse existing cool ideas from other nice guys. Many thanks;)
 
 
@@ -361,26 +361,26 @@ $ curl http://127.0.0.1:6000/status/index.jsp
 ...
 ```
 --
-### watch and update the config
+### Continue watching, update config to bring in/take out workers
 
-** PLEASE: Use another shell **
+** PLEASE: Open up another shell **
 
 ```bash
 $ cd /mnt/dynupd
 $ ./watch.sh
 ```
 
-start the next tomcat and check with curl!
+Start another tomcat and check using curl!
 ```bash
 docker run -tdi -e "SERVICE_NAME=app" --volumes-from status:ro -P rossbachp/tomcat8
 ```
 
-stop tomcat a check!
+Stop one of the tomcats and check again!
 ```bash
 $ docker stop <tomcat container id>
 ```
 ---
-### Tune the things
+### It needs tuning..
 
   * better mod_jk config
   * apache graceful restart
@@ -395,7 +395,7 @@ $ docker stop <tomcat container id>
   * commit new image apache2 again and start
   * switch to `get_modjk-workers-ectd-registrator-elegant.sh`
 --
-### add jkstatus mapping
+### add jkstatus mapping by entering a running container
 
 ```bash
 $ sudo /bin/bash
@@ -405,7 +405,7 @@ $ sed -i 's/        Allow from 127.0.0.1/        Allow from 127.0.0.1 172.17.42.
 $ exit
 ```
 --
-### graceful restart apache!
+### gracefully restart apache!
 
 ```bash
 $ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
@@ -413,7 +413,7 @@ $ sudo docker-enter $ID /bin/bash
 $ /bin/bash -c "source /etc/apache2/envvars && exec /usr/sbin/apachectl graceful"
 ```
 
-check jk-status at your docker-workshop host
+Check jk-status at your docker-workshop host
 
 ```bash
 $ curl -s http://127.0.0.1:6000/jk-status?mime=prop | grep address
@@ -421,7 +421,7 @@ worker.goofy_meitner.address=172.17.42.1:49153
 worker.sick_davinci.address=172.17.42.1:49156
 ```
 --
-### commit apache image
+### Commit changes in apache image
 
 ```bash
 $ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
@@ -436,7 +436,7 @@ apache2  0.2  ae7da438a1ba  9 seconds ago  209.4 MB
 ```
 
 --
-## restart apache2
+## Restart apache2
 ```bash
 $ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
 $ docker stop $ID
@@ -453,15 +453,15 @@ $ docker run -d -ti \
 
 
 ***
-FINISH this autoscaling httpd with tomcat lesson...
+FINISHed this autoscaling httpd/tomcat lesson...
 
 ---
-## Optimize
+## Possible optimizations
 
   * install log and config at separate docker data scratch container
-  * use external accessable network interfaces!
-  * build a watcher images
-  * use Dockerfile to build images :-)
+  * use external accessible network interfaces.
+  * build a watcher image/container
+  * of course: use a Dockerfile to build images :-)
     * httpd
     * watcher
     * ectd
@@ -477,11 +477,11 @@ It´s up to you!
 ---
 ## Summary
 
-  * autoscaling is so easy
-  * Fun power pack
-  * good ald knowledge can't combine with new infrabricks
+  * autoscaling is easy, but probably very specific to your environment
+  * Fun power pack. Low barrier for trying out things.
+  * good old admin knowledge should as well be combined with "new infrabricks"
 ***
-Many Thanks that you really follow us!
+Many Thanks for following us!
 
 Andreas & Peter
 
