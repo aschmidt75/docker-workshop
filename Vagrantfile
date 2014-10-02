@@ -13,6 +13,7 @@ Vagrant.configure("2") do |config|
     s.vm.synced_folder "spec.d/", "/mnt/spec.d"
     s.vm.synced_folder "docker.d/", "/mnt/docker.d"
     s.vm.synced_folder "suppl/dynupd-etcd-registrator", "/mnt/dynupd"
+    s.vm.synced_folder "suppl/bin", "/mnt/bin"
 
     s.vm.provider "virtualbox" do |vb|
     	vb.gui = false
@@ -79,6 +80,10 @@ if [[ -z `which nsenter` ]]; then
 		sudo cp nsenter /usr/local/bin
 		rm -fr $TMPDIR
     	}
+fi
+if [[ -z `which docker-enter` ]]; then
+  sudo cp /mnt/bin/docker-enter /usr/local/bin
+  chmod +x /usr/local/bin/docker-enter
 fi
 EOS
 
