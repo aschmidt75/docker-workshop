@@ -1,21 +1,29 @@
-# Scaling Apache Tomcat at docker based infrastructure
+# Scaling Apache Tomcat in a Docker-based infrastructure
 
-* [<andreas.schmidt@cassini.de>](mailto:andreas.schmidt@cassini.de)
-* [<peter.rossbach@bee42.com>](mailto:peter.rossbach@bee42.com)
+* [<andreas.schmidt@cassini.de>](mailto:andreas.schmidt@cassini.de)  |  @aschmidt75
+* [<peter.rossbach@bee42.com>](mailto:peter.rossbach@bee42.com)  |  @rossbachp
 
 ---
 ## Start apache installation based upon a fresh container
 
+Start vagrant vm and connect to it:
 ```bash
 $ vagrant up
 $ vagrant ssh
+```
+OR - log in using virtual box and demo/demo account
+
+***
+Create a fresh container
+
+```bash
 $ docker run -ti -v /data/packages:/mnt ubuntu /bin/bash
 root@26936f69cc5b:/#
 ```
 ***
 Installation __step by step__
 
---
+-
 ### contents of `/data/packages`
 ```bash
 $ ls /data/packages
@@ -44,8 +52,10 @@ openssl_1.0.1f-1ubuntu2.5_amd64.deb
 ssl-cert_1.0.33_all.deb
 ```
 
---
-### Regular procedure would be a 'apt-get install ..', instead we'll install directly from .deb files.
+-
+### Install
+
+Regular procedure would be `apt-get install ..`, instead we'll install directly from .deb files.
 ```bash
 $ cd /mnt
 $ dpkg -i *.deb
@@ -53,7 +63,7 @@ $ dpkg -i *.deb
 $ which apache
 /usr/sbin/apache2
 ```
---
+-
 ### check apache
 
 ```bash
@@ -87,17 +97,23 @@ Server compiled with....
  -D SERVER_CONFIG_FILE="apache2.conf"
 ```
 
---
+-
 ### configure apache mod_jk support
 
-We need to add a JkMount instruction
+We need to add a JkMount instruction:
+
+`JkMount /* loadbalancer`
 
 ```bash
-$ sed -i 's/<\/VirtualHost>/\n\tJkMount \/* loadbalancer\n<\/VirtualHost>/g' /etc/apache2/sites-enabled/000-default.conf
+$ F=/etc/apache2/sites-enabled/000-default.conf
+$ sed -i \
+ 's/<\/VirtualHost>/\n\tJkMount \/* loadbalancer\n<\/VirtualHost>/g' $F
 ```
---
+-
 
-## Copy the worker properties - We have to replace this config because it is wrong :)
+## workers.properties
+
+We have to replace this config because it is wrong :)
 
 ```bash
 root@26936f69cc5b:/# grep -v '#' /etc/libapache2-mod-jk/workers.properties | sed '/^$/d'
@@ -112,13 +128,18 @@ worker.ajp13_worker.lbfactor=1
 worker.loadbalancer.type=lb
 worker.loadbalancer.balance_workers=ajp13_worker
 
-CRTL-P CRTL-Q to leave container
 ```
---
+
+***
+CRTL-P CRTL-Q to leave container
+
+
+-
 ### Add this to your VM!
 
+We need some default directories and files to exist, otherwise Apache does not start.
+
 ```bash
-$
 $ cd /data
 $ mkdir apache2-jk-config
 $ mkdir apache2-log
@@ -127,20 +148,26 @@ $ touch workers.properties
 ```
 
 ---
-### Use `docker commit` to create an image from installed apache httpd container
+### Commit
+
+Use `docker commit` to create an image from installed apache httpd container
 
 ```bash
 $ ID=$(docker ps -l | awk '/^[0-9a-f]/{print $1}')
 $ echo $ID
 26936f69cc5b
+
 $ docker commit $ID apache2:0.1
 0a5a66dd5ae876b6e01ce454c4c3679d32b42980ffd97b42a2572fbb41b580f5
+
 $ docker images | grep apache2
 apache2  0.1 0a5a66dd5ae8 25 seconds ago 209.4 MB
 ...
 ```
---
-### clean up install container
+-
+### clean up
+
+We do not need our intermediate install container, so:
 
 ```bash
 docker stop $ID
@@ -151,14 +178,15 @@ docker rm $ID
 ## Start apache from newly created image
 
 ```bash
+$ F_HOST=/data/apache2-jk-config/workers.properties
+$ F_CONT=/etc/libapache2-mod-jk/workers.properties
 $ docker run -ti --rm \
- -v /data/apache2-jk-config/workers.properties: \
- /etc/libapache2-mod-jk/workers.properties \
+ -v $F_HOST:$F_CONT \
  apache2:0.1 /bin/bash
 ```
 
 ***
-Check apache2 config
+Inside container: check apache2 config
 
 ```bash
 $ ls -al /etc/libapache2-mod-jk/workers.properties
@@ -167,25 +195,27 @@ $ grep -i jkmount /etc/apache2/sites-enabled/000-default.conf
 JkMount /* loadbalancer
 $ exit
 ```
---
+
+-
 ## start the apache container
 
 ```bash
 $ docker run -d -ti \
  -v /data/apache2-jk-config/workers.properties:\
-/etc/libapache2-mod-jk/workers.properties \
+ /etc/libapache2-mod-jk/workers.properties \
  -v /data/apache2-log/:/var/log/apache2/ \
  -p 127.0.0.1:6000:80   \
  --name apache2 \
  apache2:0.1 \
  /bin/bash -c "source /etc/apache2/envvars && \
  exec /usr/sbin/apache2 -D FOREGROUND"
+
 9794b009031d844bbb11fcea75d29a48dc79d1019e68a4610dfaea98499289d4
 
 ```
 
---
-## check the network binding
+-
+## First check
 
 ```bash
 $ wget -O - http://0.0.0.0:6000/status
@@ -196,7 +226,7 @@ $ wget -O - http://0.0.0.0:6000/status
 ```
 
 ***
-OK, we did configured und start our tomcat backends...
+OK, we did not yet configure and start our tomcat backends...
 
 ```bash
 $ docker stop apache2
@@ -208,15 +238,14 @@ $ docker stop apache2
   * [etcd](https://github.com/coreos/etcd)
   * [registrator](https://github.com/progrium/registrator)
 
---
-### start ectd + registrator on your docker host (SMELL)
+-
+### Start etcd + registrator on your docker host
 
 ```bash
-$ sudo /bin/bash
 $ /usr/local/bin/start_etcd.sh
 $ /usr/local/bin/start_registrator.sh
-
 ```
+
 check setup
 
 ```bash
@@ -226,13 +255,11 @@ root      4248     1  0 17:30 ?        00:00:00 /usr/local/bin/etcd -v
 $ ps -ef |grep registrator
 root      4312     1  0 17:33 ?        00:00:00 /usr/local/bin/registrator etcd:///tomcat8
 ...
-
-$ exit
 $ etcdctl ls /
 /tomcat8
 ```
 
---
+-
 ### looking at the scripts ...
 
 
@@ -240,6 +267,7 @@ $ etcdctl ls /
 $ cat /usr/local/bin/start_etcd.sh
 sudo su - -c "killall etcd; /usr/local/bin/etcd \
  -v >/var/log/etcd.log 2>&1 &"
+
 $ cat /usr/local/bin/start_registrator.sh
 sudo su - -c "killall registrator; /usr/local/bin/registrator \
  etcd:///tomcat8 >/var/log/registrator.log 2>&1 &"
@@ -253,16 +281,21 @@ $ docker run -tdi \
  -e "SERVICE_NAME=app" \
  --volumes-from status:ro \
  -P rossbachp/tomcat8
+
 e2e2404b36ceb8226e0c723d18b7ea4a6d92134a79d042a6308fe4d36aea2503
 ```
 
-Registrator auto setup start
+Registrator will recognize this and inject data into etcd
 
 ```bash
 $ etcdctl ls /tomcat8/app
 /tomcat8/app/docker-workshop:goofy_meitner:8080
 /tomcat8/app/docker-workshop:goofy_meitner:8009
-# get exposed tomcat port
+```
+
+Given a key for Port 8009 (the ajp13 connector), we'll ask etcd:
+
+```bash
 $ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
 127.0.1.1:49153
 ```
@@ -270,7 +303,7 @@ $ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
 ***
 [check Dockerbox tomcat 8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
 
---
+-
 ### Design of rossbachp/tomcat8 docker image
 
 ![](images/design-tomcat8-images.png)
@@ -278,7 +311,8 @@ $ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
 You can deploy your own webapps and tomcat extended library with local volumes. Better alternative: by using a docker data container.
 
 [rossbachp/tomcat8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
---
+
+-
 ## Goals
 
   * use minimal ubuntu and java8 base images (work in progress)
@@ -286,25 +320,35 @@ You can deploy your own webapps and tomcat extended library with local volumes. 
   * deploy manager app and generate password at start
   * clean up installation, remove examples and unused `*.bat`, .. files.
   * squash footprint and clean up build artefacts
+
+-
+## Goals (contd.)
+
   * use a nicer access log pattern :-)
   * use a cleaned up server.xml without comments
     * use separate executor
     * setup HTTP (8080) and AJP (8009) connectors and expose ports
     * currently do not support APR Connectors or configure other then standard NIO
-  * reuse existing cool ideas from other nice guys. Many thanks;)
+  * reuse existing cool ideas from other nice people. Many thanks ;)
 
 
 ---
-### Create worker.properties to access tomcat from httpd
+### workers.properties
+
+We need to create a worker.properties file to access tomcat from httpd.
+
+At the VM:
 
 ```bash
 $ cd /mnt/dynupd
+
 $ ./gen-modjk-workers-etcd-registrator.sh
 $ cat /data/apache2-jk-config/workers.properties
+
 $ docker restart apache2
 ```
 
---
+-
 ### check status
 
 ```
@@ -326,25 +370,28 @@ $ curl http://127.0.0.1:6000/status/index.jsp
 ```
 
 ***
-Yeph, successfull access !
+Yep, successfull. Hostname == container ID
 
   * **ToDo:** add new status.war at status image! DATE!
 
---
-### start next one
+-
+### Start another one
 
 ```bash
-$ docker run -tdi -e "SERVICE_NAME=app" --volumes-from status:ro -P rossbachp/tomcat8
+$ docker run -tdi -e "SERVICE_NAME=app" --volumes-from status:ro \
+ -P rossbachp/tomcat8
+
 $ docker ps | grep tomcat8
 f7609e148ad1        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   5 seconds ago       Up 4 seconds        0.0.0.0:49155->8080/tcp, 0.0.0.0:49156->8009/tcp   sick_davinci
 e2e2404b36ce        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   17 minutes ago      Up 17 minutes       0.0.0.0:49153->8009/tcp, 0.0.0.0:49154->8080/tcp   goofy_meitner
+
 $ cd /mnt/dynupd
 $ ./gen-modjk-workers-etcd-registrator.sh
 $ cat /data/apache2-jk-config/workers.properties
 $ docker restart apache2
 ```
 
---
+-
 ## check loadbalancing
 
 ```bash
@@ -360,7 +407,13 @@ $ curl http://127.0.0.1:6000/status/index.jsp
   <li>Hostname : f7609e148ad1</li>
 ...
 ```
---
+
+Optionally, in another shell:
+```bash
+$ watch 'curl http://127.0.0.1:6000/status/index.jsp'
+```
+
+-
 ### Continue watching, update config to bring in/take out workers
 
 ** PLEASE: Open up another shell **
@@ -372,7 +425,8 @@ $ ./watch.sh
 
 Start another tomcat and check using curl!
 ```bash
-docker run -tdi -e "SERVICE_NAME=app" --volumes-from status:ro -P rossbachp/tomcat8
+$ docker run -tdi -e "SERVICE_NAME=app" \
+ --volumes-from status:ro -P rossbachp/tomcat8
 ```
 
 Stop one of the tomcats and check again!
@@ -385,7 +439,7 @@ $ docker stop <tomcat container id>
   * better mod_jk config
   * apache graceful restart
 
---
+-
 ### Better mod_jk support
 
   * switch watch.sh off!
@@ -394,23 +448,30 @@ $ docker stop <tomcat container id>
     - patch
   * commit new image apache2 again and start
   * switch to `get_modjk-workers-ectd-registrator-elegant.sh`
---
-### add jkstatus mapping by entering a running container
+-
+### add jkstatus mapping
+
+.. by entering a running container via `docker-enter`!
 
 ```bash
 $ sudo /bin/bash
 $ docker-enter <apache container-id> /bin/bash`
-$ sed -i 's/<\/VirtualHost>/\n\tJkMountCopy ON\n<\/VirtualHost>/g' /etc/apache2/sites-enabled/000-default.conf
-$ sed -i 's/        Allow from 127.0.0.1/        Allow from 127.0.0.1 172.17.42.1/g' /etc/apache2/mods-enabled/jk.conf
+$ CF=/etc/apache2/sites-enabled/000-default.conf
+$ sed -i 's/<\/VirtualHost>/\n\tJkMountCopy ON\n<\/VirtualHost>/g' $CF
+
+$ JK=/etc/apache2/mods-enabled/jk.conf
+$ sed -i 's/Allow from 127.0.0.1$/Allow from 127.0.0.1 172.17.42.1/g' $JK
 $ exit
 ```
---
-### gracefully restart apache!
+-
+### gracefully restart apache
 
 ```bash
 $ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
 $ sudo docker-enter $ID /bin/bash
-$ /bin/bash -c "source /etc/apache2/envvars && exec /usr/sbin/apachectl graceful"
+
+$ /bin/bash -c \
+ "source /etc/apache2/envvars && exec /usr/sbin/apachectl graceful"
 ```
 
 Check jk-status at your docker-workshop host
@@ -420,7 +481,7 @@ $ curl -s http://127.0.0.1:6000/jk-status?mime=prop | grep address
 worker.goofy_meitner.address=172.17.42.1:49153
 worker.sick_davinci.address=172.17.42.1:49156
 ```
---
+-
 ### Commit changes in apache image
 
 ```bash
@@ -435,7 +496,7 @@ apache2  0.2  ae7da438a1ba  9 seconds ago  209.4 MB
 ...
 ```
 
---
+-
 ## Restart apache2
 ```bash
 $ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
@@ -443,17 +504,18 @@ $ docker stop $ID
 $ docker rm $ID
 $ docker run -d -ti \
  -v /data/apache2-jk-config/workers.properties:\
-/etc/libapache2-mod-jk/workers.properties \
+ /etc/libapache2-mod-jk/workers.properties \
  -v /data/apache2-log/:/var/log/apache2/ \
  -p 127.0.0.1:6000:80   \
  --name apache2 \
  apache2:0.2 \
- /bin/bash -c "source /etc/apache2/envvars && exec /usr/sbin/apache2 -D FOREGROUND"
+ /bin/bash -c \
+ "source /etc/apache2/envvars && exec /usr/sbin/apache2 -D FOREGROUND"
 ```
 
 
 ***
-FINISHed this autoscaling httpd/tomcat lesson...
+FIN
 
 ---
 ## Possible optimizations
@@ -479,10 +541,15 @@ It´s up to you!
 
   * autoscaling is easy, but probably very specific to your environment
   * Fun power pack. Low barrier for trying out things.
-  * good old admin knowledge should as well be combined with "new infrabricks"
+  * good old admin knowledge, combined with "new infrabricks"
 ***
-Many Thanks for following us!
+Many Thanks for following!
 
 Andreas & Peter
 
-follow our [blog infrabricks](http://www.infrabricks.de)
+
+follow our blog [infrabricks.de](http://www.infrabricks.de)
+
+@rossbachp
+
+@aschmidt75
