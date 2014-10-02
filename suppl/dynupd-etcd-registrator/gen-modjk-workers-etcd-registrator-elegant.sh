@@ -49,7 +49,7 @@ for ID in $IDS; do
 	echo ${WORKER}.reference=worker.template >>$JK_TARGET_FILE
 	echo ${WORKER}.host=$HOST >>$JK_TARGET_FILE
 	echo ${WORKER}.port=$PORT >>$JK_TARGET_FILE
-	echo "worker.loadbalancer.balance_workers=${WORKER}" >>$JK_TARGET_FILE
+	echo "worker.loadbalancer.balance_workers=$CONTAINER_NAME" >>$JK_TARGET_FILE
 
 	I=$(($I+1))
 done

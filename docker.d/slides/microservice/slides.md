@@ -392,16 +392,11 @@ $ /bin/bash -c "source /etc/apache2/envvars && exec /usr/sbin/apachectl graceful
 ```
 
 check jk-status at your docker-workshop host
-```bash
-$ curl http://127.0.0.1:6000/jk-status?mime=prop
-```
-***
-Why worker host print localhost?
 
-```
-worker.worker.sick_davinci.host=localhost
-worker.worker.sick_davinci.port=8009
-worker.worker.sick_davinci.address=127.0.0.1:8009
+```bash
+$ curl -s http://127.0.0.1:6000/jk-status?mime=prop | grep address
+worker.goofy_meitner.address=172.17.42.1:49153
+worker.sick_davinci.address=172.17.42.1:49156
 ```
 --
 ### commit apache image
