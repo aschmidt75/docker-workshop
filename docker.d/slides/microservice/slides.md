@@ -1,7 +1,7 @@
 # Scaling Apache Tomcat in a Docker-based infrastructure
 
 * [<andreas.schmidt@cassini.de>](mailto:andreas.schmidt@cassini.de)  |  @aschmidt75
-* [<peter.rossbach@bee42.com>](mailto:peter.rossbach@bee42.com)  |  @rossbachp
+* [<peter.rossbach@bee42.com>](mailto:peter.rossbach@bee42.com)  |  @PRossbach
 
 ---
 ## Start apache installation based upon a fresh container
@@ -63,6 +63,9 @@ $ dpkg -i *.deb
 $ which apache
 /usr/sbin/apache2
 ```
+***
+  * It's fast and we don't need internet connection at install time!
+  * Install a base apache with mod_jk support.
 -
 ### check apache
 
@@ -161,13 +164,13 @@ $ docker commit $ID apache2:0.1
 0a5a66dd5ae876b6e01ce454c4c3679d32b42980ffd97b42a2572fbb41b580f5
 
 $ docker images | grep apache2
-apache2  0.1 0a5a66dd5ae8 25 seconds ago 209.4 MB
+apache2  0.1 0 a5a66dd5ae8 25 seconds ago 209.4 MB
 ...
 ```
 -
 ### clean up
 
-We do not need our intermediate install container, so:
+We don't need our intermediate install container anymore:
 
 ```bash
 docker stop $ID
@@ -207,8 +210,8 @@ $ docker run -d -ti \
  -p 127.0.0.1:6000:80   \
  --name apache2 \
  apache2:0.1 \
- /bin/bash -c "source /etc/apache2/envvars && \
- exec /usr/sbin/apache2 -D FOREGROUND"
+ /bin/bash -c \
+ "source /etc/apache2/envvars && exec /usr/sbin/apache2 -D FOREGROUND"
 
 9794b009031d844bbb11fcea75d29a48dc79d1019e68a4610dfaea98499289d4
 
@@ -274,7 +277,30 @@ sudo su - -c "killall registrator; /usr/local/bin/registrator \
 ```
 
 ---
-## start apache tomcat 8 container
+## Start apache tomcat example
+
+ * create status webapp
+ * start tomcat container
+ * register tomcat container
+ * check loadbalacing via apache httpd
+ * start another one
+
+-
+### build test status webapp
+
+```bash
+$ cd /mnt/docker.d/status
+$ ./build.sh
+$ docker ps -l
+CONTAINER ID        IMAGE                     COMMAND             CREATED             STATUS                     PORTS               NAMES
+c04254e1715d        rossbachp/status:latest   "/bin/sh -c true"   6 seconds ago       Exited (0) 6 seconds ago                       status
+```
+***
+App reported version of Tomcat, hostname and current date.
+
+-
+### start apache tomcat 8 container
+
 
 ```bash
 $ docker run -tdi \
@@ -353,27 +379,23 @@ $ docker restart apache2
 
 ```
 $ curl http://127.0.0.1:6000/status/index.jsp
-
 <html>
 <body>
 <h1>Docker Tomcat Status page</h1>
 
 <ul>
-  <li>Hostname : e2e2404b36ce</li>
+  <li>Hostname : a222c4e3f231</li>
   <li>Tomcat Version : Apache Tomcat/8.0.11</li>
-  <li>Servlet Specification Version :
-3.1</li>
-  <li>JSP version :
-2.3</li>
+  <li>Servlet Specification Version : 3.1</li>
+  <li>JSP version : 2.3</li>
+  <li>Now : 2014/10/02 17:38:32</li>
 </ul>
 </body>
+</html>
 ```
 
 ***
 Yep, successfull. Hostname == container ID
-
-  * **ToDo:** add new status.war at status image! DATE!
-
 -
 ### Start another one
 
@@ -539,9 +561,15 @@ It´s up to you!
 ---
 ## Summary
 
-  * autoscaling is easy, but probably very specific to your environment
+  * Autoscaling is easy, but probably very specific to your environment
   * Fun power pack. Low barrier for trying out things.
-  * good old admin knowledge, combined with "new infrabricks"
+  * Good old admin knowledge, combined with "new infrabricks"
+  * Build an autoscaling service entrypoint with apache mod_jk is nice!
+  * Autofailover service needs watching jk-status and update etcd.
+  * Backend access control can also easly build with haproxy and ectd.
+  * Real orchestration to coordinate process, resources, security and network access need more attention.
+    - Check [CoreOS](http://www.coreos.com) or [Google Kubernetes](https://github.com/GoogleCloudPlatform/kubernetes)!
+
 ***
 Many Thanks for following!
 
@@ -550,6 +578,5 @@ Andreas & Peter
 
 follow our blog [infrabricks.de](http://www.infrabricks.de)
 
-@rossbachp
-
+@PRossbach
 @aschmidt75

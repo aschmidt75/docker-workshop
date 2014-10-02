@@ -6,4 +6,4 @@ ADD status.war /webapps/status.war
 
 VOLUME ["/webapps"]
 
-CMD /bin/sh
+CMD true 
