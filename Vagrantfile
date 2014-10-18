@@ -27,6 +27,7 @@ Vagrant.configure("2") do |config|
 
     s.vm.provision "shell", path: 'provision.d/01_os_initial.sh'
     s.vm.provision "shell", path: 'provision.d/02_os_remove_unwanted.sh'
+    s.vm.provision "shell", path: 'provision.d/05_fix_locales.sh'
 
     # -- PART Microservices
     # download stuff we need as packages, so we do not need

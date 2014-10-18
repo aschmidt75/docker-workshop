@@ -1,2 +1,10 @@
 #!/bin/bash
-VBoxManage export "docker-workshop_docker-workshop-vm_1409065890277_99618" -o ./ovf/snapshot.ovf
+VM=`VBoxManage list vms | grep docker-workshop | tr -d '"' | cut -f 1 -d ' '`
+if [[ -z $VM ]]; then
+	echo VM not found
+	exit 1
+fi
+VBoxManage export $VM -o snapshot.ovf
+
+ls -al
+
