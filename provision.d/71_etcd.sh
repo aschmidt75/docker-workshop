@@ -2,7 +2,7 @@ if [[ ! -x /usr/local/bin/etcd ]]; then
 	cd /tmp
 	mkdir etcd-install
 	cd etcd-install
-	wget https://github.com/coreos/etcd/releases/download/v0.4.6/etcd-v0.4.6-linux-amd64.tar.gz
+	wget --quiet https://github.com/coreos/etcd/releases/download/v0.4.6/etcd-v0.4.6-linux-amd64.tar.gz
 	tar xfvz etcd-v0.4.6-linux-amd64.tar.gz
 	sudo cp etcd-v0.4.6-linux-amd64/etcd /usr/local/bin
 	sudo cp etcd-v0.4.6-linux-amd64/etcdctl /usr/local/bin

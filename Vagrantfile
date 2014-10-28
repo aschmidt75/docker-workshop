@@ -72,6 +72,10 @@ Vagrant.configure("2") do |config|
     # and progriums' registrator as well
     s.vm.provision "shell", path: 'provision.d/72_registrator.sh'
 
+    # allow demo user to fix own keyboard layout, when
+    # using virtualbox
+    s.vm.provision "shell", path: 'provision.d/80_demo_user_locales.sh'
+
     # install and run serverspec
     s.vm.provision "shell", path: 'provision.d/91_serverspec.sh'
     s.vm.provision "shell", path: 'provision.d/98_run_spec.sh'

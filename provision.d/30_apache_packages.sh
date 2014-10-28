@@ -17,6 +17,6 @@ if [[ ! -f /tmp/.apache2.downloaded ]]; then
 	done
 	cd /data/packages
 	cat /tmp/apache2-pkglist
-	wget --input-file /tmp/apache2-pkglist
+	wget --quiet --input-file /tmp/apache2-pkglist
 	touch /tmp/.apache2.downloaded
 fi

@@ -9,9 +9,5 @@ describe 'It should have the garethr-docker module' do
 		it { should be_directory }
 		it { should be_mode '755' }
 	end
-
-	describe command 'sudo puppet module list' do
-		its(:stdout) { should match 'garethr-docker.*1\.1\.3' }
-	end
 end
 
