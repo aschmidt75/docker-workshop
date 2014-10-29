@@ -82,7 +82,18 @@
   * Build docker container for every peaces
   * Managed the scaling with a service discovery (ETCD)
   * Make it better
+---
+## install docker
 
+```bash
+  sudo apt-get install -yqq apt-transport-https
+  dig keyserver.ubuntu.com
+  sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 \
+   --recv-keys  36A1D7869245C8950F966E92D8576A8BA88D21E9
+  sudo sh -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+  sudo apt-get update -yqq
+  sudo apt-get install -yqq lxc-docker
+```
 ---
 ## Start apache installation based upon a fresh container
 
@@ -179,7 +190,12 @@ Server compiled with....
  -D AP_TYPES_CONFIG_FILE="mime.types"
  -D SERVER_CONFIG_FILE="apache2.conf"
 ```
+-
+### install modjk
 
+```bash
+apt-get install -y libapache2-mod-jk
+```
 -
 ### configure apache mod_jk support
 
