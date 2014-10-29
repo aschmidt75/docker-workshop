@@ -6,6 +6,6 @@ RUN opkg-install curl lighttpd
 
 #ADD index.html /www/index.html
 #ADD lighttpd.conf /etc/lighttpd/lighttpd.conf
-ADD presentation.tar.gz /www
+ONBUILD slidefire.tar.gz /www
 
 CMD ["lighttpd", "-D","-f", "/etc/lighttpd/lighttpd.conf"]
