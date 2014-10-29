@@ -75,6 +75,7 @@ Vagrant.configure("2") do |config|
     # allow demo user to fix own keyboard layout, when
     # using virtualbox
     s.vm.provision "shell", path: 'provision.d/80_demo_user_locales.sh'
+    s.vm.provision "shell", path: 'provision.d/81_copy_mounted.sh'
 
     # install and run serverspec
     s.vm.provision "shell", path: 'provision.d/91_serverspec.sh'

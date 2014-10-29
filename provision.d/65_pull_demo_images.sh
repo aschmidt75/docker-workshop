@@ -12,3 +12,6 @@ docker tag 127.0.0.1:5000/dockerfile/nginx:latest nginx:latest
 
 docker pull 127.0.0.1:5000/progrium/registrator
 docker tag 127.0.0.1:5000/progrium/registrator:latest progrium/registrator:latest
+
+docker pull 127.0.0.1:5000/rossbachp/presentation
+docker tag 127.0.0.1:5000/rossbachp/presentation:latest rossbachp/presentation:latest
