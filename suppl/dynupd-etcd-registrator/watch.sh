@@ -14,5 +14,5 @@ while true; do
 
 	sleep 2
 	./gen-modjk-workers-etcd-registrator.sh
-	docker restart apache >/dev/null
+	docker restart apache2 >/dev/null
 done

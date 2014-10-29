@@ -1,0 +1,1 @@
+cp -rp /mnt /data/

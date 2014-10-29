@@ -3,9 +3,9 @@
 * [<andreas.schmidt@cassini.de>](mailto:andreas.schmidt@cassini.de)  |  @aschmidt75
 * [<peter.rossbach@bee42.com>](mailto:peter.rossbach@bee42.com)  |  @PRossbach
 ---
-## What we want?
+## What we like to show ...
 
-  * Test the newest kids on the IT-block
+  * Test the newest kid on the IT-block
   * Construct a microservice environment form scratch
     - build a simple version
     - understand the pieces
@@ -14,43 +14,47 @@
 ---
 ### Microservice
 
-  * Microservice means
-    - developing a single,
+  * **Microservice** means to
+    - develop a single,
     - small,
-    - meaningful functional feature as single service
-    - each service has it’s own process
-    - and communicate with lightweight mechanism,
-    - deployed in single or multiple servers.
+    - meaningful functional feature as single service.
+    - Each service has its own process
+    - and communicates with lightweight mechanisms,
+    - deployed on single or multiple servers.
 ***
 [Microservice Architecture – A Quick Guide](http://www.javacodegeeks.com/2014/06/microservice-architecture-a-quick-guide.html)
 -
 ### Why Microservices? -*1*
 
-  * Each micro service is small and focused on a specific feature / business requirement.
-  * Microservice can be developed independently by small team of developers (normally 2 to 5 developers).
-  * Microservice is loosely coupled, means services are independent, in terms of development and deployment both.
-  * Microservice can be developed using different programming language (Personally I don’t suggest to do it).
-  * Microservice allows easy and flexible way to integrate automatic deployment with Continuous Integration tools (for e.g: Jenkins, Hudson, bamboo etc..).
+A Microservices ..
+
+  * is small and focused on a specific feature / business requirement.
+  * can be developed independently by small team of developers (~ 2 to 5 dev's).
+  * is loosely coupled: services are independent, both in terms of development and deployment.
+  * can be developed using different programming languages (Personally I don’t suggest to do it).
+  * allows a easy and flexible way to integrate automatic deployment with Continuous Integration tools (for e.g: Jenkins, Hudson, bamboo etc..).
   * The productivity of a new team member will be quick enough.
 -
 ### Why Microservices? -*2*
 
-  * Microservice is easy to understand, modify and maintain for a developer because separation of code,small team and focused work.
-  * Microservice allows you to take advantage of emerging and latest technologies (framework, programming language , programming practice, etc.).
-  * Microservice has code for business logic only, No mixup with HTML,CSS or other UI component.
-  * Microservice is easy to scale based on demand.
-  * Microservice can deploy on commodity hardware or low / medium configuration servers.
-  * Easy to integrate 3rd party service.
-  * Every microservice has it’s own storage capability but it depends on the project’s requirement, you can have common database like MySQL or Oracle for all services.
+A Microservice
+
+  * is easy to understand, modify and maintain for a developer because separation of code,small team and focused work.
+  * allows you to take advantage of emerging and latest technologies (framework, programming language, programming practice, etc.).
+  * has code for business logic only, no mixup with HTML,CSS or other UI component.
+  * is easy to scale based on demand.
+  * can be deployed on commodity hardware or low / medium configuration servers.
+  * easy to integrate 3rd party service.
+  * has its own storage capability but it depends on the projects requirement, you can have common database like MySQL or Oracle for all services.
 -
 ### Microservice Disadvantages
 
   * Microservice architecture brings a lot of operations overhead.
   * DevOps Skill required (http://en.wikipedia.org/wiki/DevOps).
   * Duplication of Effort.
-  * Distributed System is complicated to manage .
-  * Default to trace problem because of distributed deployment.
-  * Complicated to manage whole products when number of services increases.
+  * Distributed System is complicated to manage.
+  * Difficult to trace problem because of distributed deployment.
+  * Complicated to manage whole products when number of services increase.
 
 ---
 ## Microservice - Scale Cube
@@ -61,13 +65,13 @@
 -
 ### Definition of the axis
 
-  * X-axis scaling
+  * **X-axis scaling**
     - X-axis scaling consists of running multiple copies of an application behind a load balancer
-  * Y-axis scaling
+  * **Y-axis scaling**
     - Unlike X-axis and Z-axis, which consist of running multiple, identical copies of the application
     - Y-axis axis scaling splits the application into multiple, different services.
     - Each service is responsible for one or more closely related functions.
-  * Z-axis scaling
+  * **Z-axis scaling**
     - When using Z-axis scaling each server runs an identical copy of the code.
 -
 ### Example Architectur
@@ -79,11 +83,17 @@
 
   * Use an Apache Tomcat to build you app -- `hello world service ABC`
   * Build a loadbalancer with apache httpd and mod_jk
+<<<<<<< HEAD
   * Build docker container for every peaces
   * Managed the scaling with a service discovery (ETCD)
   * Make it better
 ---
 ## install docker
+=======
+  * Build docker container for all parts
+  * Manage scalability with a service discovery (ETCD)
+  * Improve, make it better.
+>>>>>>> 9264c939d597bda7772a25f38bf70dd4f756f392
 
 ```bash
   sudo apt-get install -yqq apt-transport-https
@@ -97,14 +107,29 @@
 ---
 ## Start apache installation based upon a fresh container
 
-Start vagrant vm and connect to it:
+Start demo vm and connect to it
+
+using vagrant:
 ```bash
 $ vagrant up
 $ vagrant ssh
 ```
+
 OR - log in using virtual box and demo/demo account
 
 ***
+-
+Verify vm status
+```bash
+$ cd /data/mnt/spec.d/
+
+$ sudo rake spec
+....
+Finished in 0.7392 seconds
+50 examples, 0 failures
+```
+
+-
 Create a fresh container
 
 ```bash
@@ -151,7 +176,7 @@ Regular procedure would be `apt-get install ..`, instead we'll install directly 
 $ cd /mnt
 $ dpkg -i *.deb
 ...
-$ which apache
+$ which apache2
 /usr/sbin/apache2
 ```
 ***
@@ -230,13 +255,16 @@ worker.loadbalancer.balance_workers=ajp13_worker
 ```
 
 ***
-CRTL-P CRTL-Q to leave container
+Press CRTL-P -> CRTL-Q to leave container
 
 
 -
-### Add this to your VM!
+### Add on Demo VM:
 
-We need some default directories and files to exist, otherwise Apache does not start.
+Config and logs for our apache container will reside on a host volume (not within
+container).
+
+So we need some default directories and files to exist, otherwise Apache does not start.
 
 ```bash
 $ cd /data
@@ -300,8 +328,7 @@ $ exit
 
 ```bash
 $ docker run -d -ti \
- -v /data/apache2-jk-config/workers.properties:\
- /etc/libapache2-mod-jk/workers.properties \
+ -v /data/apache2-jk-config/workers.properties:/etc/libapache2-mod-jk/workers.properties \
  -v /data/apache2-log/:/var/log/apache2/ \
  -p 127.0.0.1:6000:80   \
  --name apache2 \
@@ -340,12 +367,7 @@ $ docker stop apache2
 -
 ### Start etcd + registrator on your docker host
 
-```bash
-$ /usr/local/bin/start_etcd.sh
-$ /usr/local/bin/start_registrator.sh
-```
-
-check setup
+Check setup, etcd and registrator need to be running:
 
 ```bash
 $ ps -ef |grep etcd
@@ -357,6 +379,20 @@ root      4312     1  0 17:33 ?        00:00:00 /usr/local/bin/registrator etcd:
 $ etcdctl ls /
 /tomcat8
 ```
+
+Also viable, because it is contained in our spec:
+```bash
+$ ( cd /data/mnt/spec.d && sudo rake spec )
+```
+
+***
+In case of errors:
+
+```bash
+$ /usr/local/bin/start_etcd.sh
+$ /usr/local/bin/start_registrator.sh
+```
+
 
 -
 ### looking at the scripts ...
@@ -385,7 +421,7 @@ sudo su - -c "killall registrator; /usr/local/bin/registrator \
 ### build test status webapp
 
 ```bash
-$ cd /mnt/docker.d/status
+$ cd /data/mnt/docker.d/status
 $ ./build.sh
 $ docker ps -l
 CONTAINER ID        IMAGE                     COMMAND             CREATED             STATUS                     PORTS               NAMES
@@ -462,7 +498,7 @@ We need to create a worker.properties file to access tomcat from httpd.
 At the VM:
 
 ```bash
-$ cd /mnt/dynupd
+$ cd /data/mnt/dynupd
 
 $ ./gen-modjk-workers-etcd-registrator.sh
 $ cat /data/apache2-jk-config/workers.properties
@@ -503,7 +539,7 @@ $ docker ps | grep tomcat8
 f7609e148ad1        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   5 seconds ago       Up 4 seconds        0.0.0.0:49155->8080/tcp, 0.0.0.0:49156->8009/tcp   sick_davinci
 e2e2404b36ce        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   17 minutes ago      Up 17 minutes       0.0.0.0:49153->8009/tcp, 0.0.0.0:49154->8080/tcp   goofy_meitner
 
-$ cd /mnt/dynupd
+$ cd /data/mnt/dynupd
 $ ./gen-modjk-workers-etcd-registrator.sh
 $ cat /data/apache2-jk-config/workers.properties
 $ docker restart apache2
@@ -537,7 +573,7 @@ $ watch 'curl http://127.0.0.1:6000/status/index.jsp'
 ** PLEASE: Open up another shell **
 
 ```bash
-$ cd /mnt/dynupd
+$ cd /data/mnt/dynupd
 $ ./watch.sh
 ```
 

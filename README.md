@@ -21,10 +21,19 @@ includes
  * ufw is stopped
  
 
-todos:
- * apache2 does not yet serve files from /data/static
+Start slide container:
+=====================
+
+```bash
+$ /data/mnt/docker.d/slides/microservice
+$ ./build.sh
+$ ./run.sh
+```
+
+Point browser to [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 License
 =======
 The MIT License (MIT)
 Copyright (c) 2014 Andreas Schmidt
+
