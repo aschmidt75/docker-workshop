@@ -1,5 +1,7 @@
 # Building your own image
 
+* `docker build PATH` Build a new image from the source path
+
 
 ## A Dockerfile
 ```
