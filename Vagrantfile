@@ -5,6 +5,9 @@ Vagrant.configure("2") do |config|
 
   # forward presentation port (connected to presentation container)
   config.vm.network "forwarded_port", guest: 8000, host: 8000
+  config.vm.network "forwarded_port", guest: 8001, host: 8001
+  config.vm.network "forwarded_port", guest: 8002, host: 8002
+  config.vm.network "forwarded_port", guest: 8003, host: 8003
 
   # Ubuntu 14.04 (trusty tahr, 64bit)
   config.vm.box 	= 'trusty64'

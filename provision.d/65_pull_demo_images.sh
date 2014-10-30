@@ -1,17 +1,15 @@
-docker pull 127.0.0.1:5000/ubuntu:14.04
-docker tag 127.0.0.1:5000/ubuntu:14.04 ubuntu:14.04
-docker tag 127.0.0.1:5000/ubuntu:14.04 ubuntu:latest
-docker pull 127.0.0.1:5000/busybox:latest
-#docker tag 127.0.0.1:5000/busybox:latest busybox:latest
-docker rmi busybox
-docker pull 127.0.0.1:5000/rossbachp/tomcat8
-docker tag 127.0.0.1:5000/rossbachp/tomcat8:latest rossbachp/tomcat8:latest
-docker pull 127.0.0.1:5000/dockerfile/java:oracle-java8
-docker pull 127.0.0.1:5000/dockerfile/nginx
-docker tag 127.0.0.1:5000/dockerfile/nginx:latest nginx:latest
+# pull images directly on vm, tag for local registry and push to registry
 
-docker pull 127.0.0.1:5000/progrium/registrator
-docker tag 127.0.0.1:5000/progrium/registrator:latest progrium/registrator:latest
+DOCKER_IMAGES="ubuntu:latest busybox:latest rossbachp/tomcat8:latest rossbachp/presentation:latest dockerfile/java:oracle-java8 dockerfile/nginx:latest progrium/registrator"
+LOCAL_URL=127.0.0.1:5000
 
-docker pull 127.0.0.1:5000/rossbachp/presentation
-docker tag 127.0.0.1:5000/rossbachp/presentation:latest rossbachp/presentation:latest
+for DOCKER_IMAGE in $DOCKER_IMAGES; do
+  echo -- processing $DOCKER_IMAGE
+  docker pull $DOCKER_IMAGE
+  R=$LOCAL_URL/$DOCKER_IMAGE
+  docker tag $DOCKER_IMAGE $R
+  docker push $R
+done
+
+# delete some images, so we can show docker pull
+docker rmi busybox:latest
