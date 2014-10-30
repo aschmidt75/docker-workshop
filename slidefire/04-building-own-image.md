@@ -35,3 +35,5 @@ CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
 * `ADD <files>` add files from the build environment into the image with tar extraction
 * `COPY <files>` same as ADD without the extraction
 * `ONBUILD <build instruction>` execute the instruction when child image is build
+
+tag

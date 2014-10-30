@@ -1,4 +1,4 @@
-# Running in containers
+# Running containers
 
 
 ## Running a command in a container
@@ -56,13 +56,19 @@ be9db7f93391        127.0.0.1:5000/ubuntu:14.04   "/bin/bash"            23 minu
 ## Stopping and restarting a container
 * `docker stop CONTAINER` Stop a container (SIGTERM)
 * `docker kill CONTAINER` Kill a container (SIGKILL)
-* `docker run --name mycontainer -i -t ubuntu /bin/bash` Naming the container
 * `docker start CONTAINER` Starting a stopped container by name or id
 
+```
+$ docker kill 8003a50512e9
+8003a50512e9
+```
 
-## Attaching
-* `docker attach CONTAINER` Attaching to a container
-* `Ctrl-p + Ctrl-q` Detach from a container
+
+## Name a container
+
+```
+$ docker run --name mycontainer -i -t ubuntu /bin/bash
+```
 
 
 ## Information about a container
@@ -72,9 +78,21 @@ be9db7f93391        127.0.0.1:5000/ubuntu:14.04   "/bin/bash"            23 minu
 
 
 ## Remove a container
-* `docker rm CONTAINER` Remove a container
+* `docker rm mycontainer` Remove a container
 * `docker rm $(docker ps -a -q)` Remove all container
+
+
+## Excercise 2
+
+1. Print HelloWJax with a Docker container
+2. Start a bash in a container and remove the `ls` command
+3. Start a background container with a while loop
+4. {Examine, stop, start} that container
+5. Enter that container with `docker exec`
+
+
 # Run options
+
 * `docker run [OPTIONS] IMAGE [COMMAND] [ARG...]`
 * `-i -t` Keep STDIN open attach a pseudo-TTY
 * `-p <hostport>:<containerport` Publish a specfic port

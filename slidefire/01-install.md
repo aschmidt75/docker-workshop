@@ -108,9 +108,21 @@ Commands:
 
 ## Check local Docker registry
 
-* TODO: How to start registry
-* TODO: How to login 
-* TODO: How to see if everything is running
+* Start a local registry
+```
+$ /usr/local/bin/start_registry.sh
+```
 
+* Check local regostry
 ```
+$ docker ps -a
+CONTAINER ID        IMAGE                         COMMAND                CREATED             STATUS                       PORTS                      NAMES
+5bb7620b2b47        registry:latest               "/bin/sh -c 'exec do   14 minutes ago      Up 14 minutes                127.0.0.1:5000->5000/tcp   registry
 ```
+
+
+## Excercise 1
+
+1. Check your Docker and Fig installation.
+2. Examine available Docker commands. 
+
