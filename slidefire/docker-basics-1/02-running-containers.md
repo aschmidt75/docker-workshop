@@ -93,7 +93,8 @@ $ docker run --name mycontainer -i -t ubuntu /bin/bash
 
 ## Excercise 2 b
 
-Start the nginx container, open port forwarding and browser to localhost:8080
+1. Start the nginx container and publish the port 80 to 8000.
+2. Verify it in you browser.
 
 # Run options
 
