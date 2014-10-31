@@ -91,19 +91,19 @@ body {
  *********************************************/
 .reveal .controls div.navigate-left,
 .reveal .controls div.navigate-left.enabled {
-  border-right-color: darkblue; }
+  border-right-color: grey; }
 
 .reveal .controls div.navigate-right,
 .reveal .controls div.navigate-right.enabled {
-  border-left-color: darkblue; }
+  border-left-color: grey; }
 
 .reveal .controls div.navigate-up,
 .reveal .controls div.navigate-up.enabled {
-  border-bottom-color: darkblue; }
+  border-bottom-color: grey; }
 
 .reveal .controls div.navigate-down,
 .reveal .controls div.navigate-down.enabled {
-  border-top-color: darkblue; }
+  border-top-color: grey; }
 
 .reveal .controls div.navigate-left.enabled:hover {
   border-right-color: #0000f1; }
