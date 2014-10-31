@@ -1,5 +1,6 @@
 # Working with images
 
+
 ## Available images
 * `docker images` Available images on the host
 
