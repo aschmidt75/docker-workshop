@@ -88,5 +88,19 @@ e412662cb4d8376b3d78a202f78ff3b42980041fc067b6c1c12d67163b1e5435
 3. Run the container and publish `-p 8080:80`
 4. Submit the changes to a new image and start it
 
+Solution
+<!--
+$ docker run -it - - name mynginx nginx /bin/bash
+ # create a simple html file
+ # cp to /usr/share/nginx/html
+
+$ docker create - -name mynginx -p 8080:80 nginx
+$ docker start mynginx
+
+
+
+-->
+
+
 
 

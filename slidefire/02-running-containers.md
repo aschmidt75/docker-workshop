@@ -82,7 +82,7 @@ $ docker run --name mycontainer -i -t ubuntu /bin/bash
 * `docker rm $(docker ps -a -q)` Remove all container
 
 
-## Excercise 2
+## Excercise 2 a
 
 1. Print HelloWJax with a Docker container
 2. Start a bash in a container and remove the `ls` command
@@ -90,6 +90,10 @@ $ docker run --name mycontainer -i -t ubuntu /bin/bash
 4. {Examine, stop, start} that container
 5. Enter that container with `docker exec`
 
+
+## Excercise 2 b
+
+Start the nginx container, open port forwarding and browser to localhost:8080
 
 # Run options
 
