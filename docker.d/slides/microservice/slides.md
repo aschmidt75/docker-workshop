@@ -3,7 +3,7 @@
 * [<andreas.schmidt@cassini.de>](mailto:andreas.schmidt@cassini.de)  |  @aschmidt75
 * [<peter.rossbach@bee42.com>](mailto:peter.rossbach@bee42.com)  |  @PRossbach
 ---
-## What we want?
+## What we like to show
 
   * Test the newest kids on the IT-block
   * Construct a microservice environment form scratch
@@ -23,37 +23,6 @@
     - deployed in single or multiple servers.
 ***
 [Microservice Architecture – A Quick Guide](http://www.javacodegeeks.com/2014/06/microservice-architecture-a-quick-guide.html)
-<<<<<<< HEAD
--
-### Why Microservices? -*1*
-
-  * Each micro service is small and focused on a specific feature / business requirement.
-  * Microservice can be developed independently by small team of developers (normally 2 to 5 developers).
-  * Microservice is loosely coupled, means services are independent, in terms of development and deployment both.
-  * Microservice can be developed using different programming language (Personally I don’t suggest to do it).
-  * Microservice allows easy and flexible way to integrate automatic deployment with Continuous Integration tools (for e.g: Jenkins, Hudson, bamboo etc..).
-  * The productivity of a new team member will be quick enough.
--
-### Why Microservices? -*2*
-
-  * Microservice is easy to understand, modify and maintain for a developer because separation of code,small team and focused work.
-  * Microservice allows you to take advantage of emerging and latest technologies (framework, programming language , programming practice, etc.).
-  * Microservice has code for business logic only, No mixup with HTML,CSS or other UI component.
-  * Microservice is easy to scale based on demand.
-  * Microservice can deploy on commodity hardware or low / medium configuration servers.
-  * Easy to integrate 3rd party service.
-  * Every microservice has it’s own storage capability but it depends on the project’s requirement, you can have common database like MySQL or Oracle for all services.
--
-### Microservice Disadvantages
-
-  * Microservice architecture brings a lot of operations overhead.
-  * DevOps Skill required (http://en.wikipedia.org/wiki/DevOps).
-  * Duplication of Effort.
-  * Distributed System is complicated to manage .
-  * Default to trace problem because of distributed deployment.
-  * Complicated to manage whole products when number of services increases.
-=======
->>>>>>> updated microservices slides, build apache container from dockerfile
 
 ---
 ## Microservice - Scale Cube
@@ -73,7 +42,7 @@
   * Z-axis scaling
     - When using Z-axis scaling each server runs an identical copy of the code.
 -
-### Example Architectur
+### Example Architecture
 
 ![](images/web-architectur-simple.png)
 
@@ -87,18 +56,6 @@
   * Make it better
 
 ---
-<<<<<<< HEAD
-## install docker
-
-```bash
-  sudo apt-get install -yqq apt-transport-https
-  dig keyserver.ubuntu.com
-  sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 \
-   --recv-keys  36A1D7869245C8950F966E92D8576A8BA88D21E9
-  sudo sh -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
-  sudo apt-get update -yqq
-  sudo apt-get install -yqq lxc-docker
-=======
 ## Apache Tomcat
 
  * create status webapp
@@ -137,19 +94,14 @@ rossbachp/status                             latest                247d45c61768 
 $ docker ps -l
 CONTAINER ID        IMAGE                     COMMAND             CREATED             STATUS                     PORTS               NAMES
 c04254e1715d        rossbachp/status:latest   "/bin/sh -c true"   6 seconds ago       Exited (0) 6 seconds ago                       status
->>>>>>> updated microservices slides, build apache container from dockerfile
 ```
 ***
 It's a volume container, it contains only executable code (but it does not execute).
 
-<<<<<<< HEAD
-Start vagrant vm and connect to it:
-=======
 App reported version of Tomcat, hostname and current date.
 
 -
 ### How it is being built
->>>>>>> updated microservices slides, build apache container from dockerfile
 ```bash
 $ cat build.sh
 #!/bin/bash
@@ -161,11 +113,6 @@ sudo docker build -t="rossbachp/status" .
 sudo docker run --name=status rossbachp/status
 rm status.war
 ```
-<<<<<<< HEAD
-OR - log in using virtual box and demo/demo account
-
-***
-=======
 
 -
 ### Start etcd + registrator on your docker host
@@ -240,7 +187,6 @@ Start Apache HTTPD installation
   * save the work
 
 -
->>>>>>> updated microservices slides, build apache container from dockerfile
 Create a fresh container
 
 ```bash
@@ -472,42 +418,6 @@ $ docker stop apache2
   * [etcd](https://github.com/coreos/etcd)
   * [registrator](https://github.com/progrium/registrator)
 
-<<<<<<< HEAD
--
-### Start etcd + registrator on your docker host
-
-```bash
-$ /usr/local/bin/start_etcd.sh
-$ /usr/local/bin/start_registrator.sh
-```
-
-check setup
-
-```bash
-$ ps -ef |grep etcd
-root      4248     1  0 17:30 ?        00:00:00 /usr/local/bin/etcd -v
-...
-$ ps -ef |grep registrator
-root      4312     1  0 17:33 ?        00:00:00 /usr/local/bin/registrator etcd:///tomcat8
-...
-$ etcdctl ls /
-/tomcat8
-```
-
--
-### looking at the scripts ...
-
-
-```bash
-$ cat /usr/local/bin/start_etcd.sh
-sudo su - -c "killall etcd; /usr/local/bin/etcd \
- -v >/var/log/etcd.log 2>&1 &"
-
-$ cat /usr/local/bin/start_registrator.sh
-sudo su - -c "killall registrator; /usr/local/bin/registrator \
- etcd:///tomcat8 >/var/log/registrator.log 2>&1 &"
-```
-
 ---
 ## Start apache tomcat example
 
@@ -561,37 +471,6 @@ $ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
 ***
 [check Dockerbox tomcat 8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
 
--
-### Design of rossbachp/tomcat8 docker image
-
-![](images/design-tomcat8-images.png)
-***
-You can deploy your own webapps and tomcat extended library with local volumes. Better alternative: by using a docker data container.
-
-[rossbachp/tomcat8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
-
--
-## Goals
-
-  * use minimal ubuntu and java8 base images (work in progress)
-  * inject libs and .wars as volumes (hence the data container)
-  * deploy manager app and generate password at start
-  * clean up installation, remove examples and unused `*.bat`, .. files.
-  * squash footprint and clean up build artefacts
-
--
-## Goals (contd.)
-
-  * use a nicer access log pattern :-)
-  * use a cleaned up server.xml without comments
-    * use separate executor
-    * setup HTTP (8080) and AJP (8009) connectors and expose ports
-    * currently do not support APR Connectors or configure other then standard NIO
-  * reuse existing cool ideas from other nice people. Many thanks ;)
-
-
-=======
->>>>>>> updated microservices slides, build apache container from dockerfile
 ---
 ### workers.properties
 
