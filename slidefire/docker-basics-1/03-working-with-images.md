@@ -91,15 +91,21 @@ e412662cb4d8376b3d78a202f78ff3b42980041fc067b6c1c12d67163b1e5435
 
 Solution
 <!--
-$ docker run -it - - name mynginx nginx /bin/bash
- # create a simple html file
- # cp to /usr/share/nginx/html
+$ docker create --name mynginx -p 8080:80 nginx
+$ docker start -i mynginx
+# browse to localhost:8080
+# keep running open new terminal
+$ docker exec -it mynginx /bin/bash
+$ echo hello wjax > /usr/share/nginx/html/index.html
+# browse to localhost:8080
+$ docker diff mynginx
+# make image
+$ docker commit mynginx wjaxnginx
+$ docker images
+$ docker run -p 8080:80 wjaxnginx
 
-$ docker create - -name mynginx -p 8080:80 nginx
-$ docker start mynginx
-
-
-
+$ docker ps -a
+$ docker diff 39005338b8d1
 -->
 
 
