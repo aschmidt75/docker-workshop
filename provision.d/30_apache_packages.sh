@@ -20,3 +20,8 @@ if [[ ! -f /tmp/.apache2.downloaded ]]; then
 	wget --quiet --input-file /tmp/apache2-pkglist
 	touch /tmp/.apache2.downloaded
 fi
+
+sudo cp /mnt/docker.d/apache_httpd/* /data/packages
+cd /data/packages
+./build.sh
+

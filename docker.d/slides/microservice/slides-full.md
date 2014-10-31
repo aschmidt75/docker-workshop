@@ -3,9 +3,9 @@
 * [<andreas.schmidt@cassini.de>](mailto:andreas.schmidt@cassini.de)  |  @aschmidt75
 * [<peter.rossbach@bee42.com>](mailto:peter.rossbach@bee42.com)  |  @PRossbach
 ---
-## What we like to show
+## What we like to show ...
 
-  * Test the newest kids on the IT-block
+  * Test the newest kid on the IT-block
   * Construct a microservice environment form scratch
     - build a simple version
     - understand the pieces
@@ -14,15 +14,47 @@
 ---
 ### Microservice
 
-  * Microservice means
-    - developing a single,
+  * **Microservice** means to
+    - develop a single,
     - small,
-    - meaningful functional feature as single service
-    - each service has it’s own process
-    - and communicate with lightweight mechanism,
-    - deployed in single or multiple servers.
+    - meaningful functional feature as single service.
+    - Each service has its own process
+    - and communicates with lightweight mechanisms,
+    - deployed on single or multiple servers.
 ***
 [Microservice Architecture – A Quick Guide](http://www.javacodegeeks.com/2014/06/microservice-architecture-a-quick-guide.html)
+-
+### Why Microservices? -*1*
+
+A Microservices ..
+
+  * is small and focused on a specific feature / business requirement.
+  * can be developed independently by small team of developers (~ 2 to 5 dev's).
+  * is loosely coupled: services are independent, both in terms of development and deployment.
+  * can be developed using different programming languages (Personally I don’t suggest to do it).
+  * allows a easy and flexible way to integrate automatic deployment with Continuous Integration tools (for e.g: Jenkins, Hudson, bamboo etc..).
+  * The productivity of a new team member will be quick enough.
+-
+### Why Microservices? -*2*
+
+A Microservice
+
+  * is easy to understand, modify and maintain for a developer because separation of code,small team and focused work.
+  * allows you to take advantage of emerging and latest technologies (framework, programming language, programming practice, etc.).
+  * has code for business logic only, no mixup with HTML,CSS or other UI component.
+  * is easy to scale based on demand.
+  * can be deployed on commodity hardware or low / medium configuration servers.
+  * easy to integrate 3rd party service.
+  * has its own storage capability but it depends on the projects requirement, you can have common database like MySQL or Oracle for all services.
+-
+### Microservice Disadvantages
+
+  * Microservice architecture brings a lot of operations overhead.
+  * DevOps Skill required (http://en.wikipedia.org/wiki/DevOps).
+  * Duplication of Effort.
+  * Distributed System is complicated to manage.
+  * Difficult to trace problem because of distributed deployment.
+  * Complicated to manage whole products when number of services increase.
 
 ---
 ## Microservice - Scale Cube
@@ -33,16 +65,16 @@
 -
 ### Definition of the axis
 
-  * X-axis scaling
+  * **X-axis scaling**
     - X-axis scaling consists of running multiple copies of an application behind a load balancer
-  * Y-axis scaling
+  * **Y-axis scaling**
     - Unlike X-axis and Z-axis, which consist of running multiple, identical copies of the application
     - Y-axis axis scaling splits the application into multiple, different services.
     - Each service is responsible for one or more closely related functions.
-  * Z-axis scaling
+  * **Z-axis scaling**
     - When using Z-axis scaling each server runs an identical copy of the code.
 -
-### Example Architecture
+### Example Architectur
 
 ![](images/web-architectur-simple.png)
 
@@ -51,140 +83,51 @@
 
   * Use an Apache Tomcat to build you app -- `hello world service ABC`
   * Build a loadbalancer with apache httpd and mod_jk
+<<<<<<< HEAD
   * Build docker container for every peaces
   * Managed the scaling with a service discovery (ETCD)
   * Make it better
-
 ---
-## Apache Tomcat
-
- * create status webapp
- * start tomcat container
- * register tomcat container
- * check loadbalacing via apache httpd
- * start another one
-
--
-### Design of rossbachp/tomcat8 docker image
-
-![](images/design-tomcat8-images.png)
-***
-You can deploy your own webapps and tomcat extended library with local volumes. Better alternative: by using a docker data container.
-
-[rossbachp/tomcat8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
-
--
-## Goals
-
-  * use minimal ubuntu and java8 base images (work in progress)
-  * inject libs and .wars as volumes (hence the data container)
-  * deploy manager app and generate password at start
-  * clean up installation, remove examples and unused `*.bat`, .. files.
-  * squash footprint and clean up build artefacts
-
--
-### build test status webapp
+## install docker
+=======
+  * Build docker container for all parts
+  * Manage scalability with a service discovery (ETCD)
+  * Improve, make it better.
+>>>>>>> 9264c939d597bda7772a25f38bf70dd4f756f392
 
 ```bash
-$ cd /data/mnt/docker.d/status
-$ ./build.sh
-$ docker images
-REPOSITORY                                   TAG                   IMAGE ID            CREATED             VIRTUAL SIZE
-rossbachp/status                             latest                247d45c61768        2 seconds ago       2.434 MB
-$ docker ps -l
-CONTAINER ID        IMAGE                     COMMAND             CREATED             STATUS                     PORTS               NAMES
-c04254e1715d        rossbachp/status:latest   "/bin/sh -c true"   6 seconds ago       Exited (0) 6 seconds ago                       status
+  sudo apt-get install -yqq apt-transport-https
+  dig keyserver.ubuntu.com
+  sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 \
+   --recv-keys  36A1D7869245C8950F966E92D8576A8BA88D21E9
+  sudo sh -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+  sudo apt-get update -yqq
+  sudo apt-get install -yqq lxc-docker
 ```
-***
-It's a volume container, it contains only executable code (but it does not execute).
-
-App reported version of Tomcat, hostname and current date.
-
--
-### How it is being built
-```bash
-$ cat build.sh
-#!/bin/bash
-sudo apt-get install -y zip
-cd status
-zip -r ../status.war .
-cd ..
-sudo docker build -t="rossbachp/status" .
-sudo docker run --name=status rossbachp/status
-rm status.war
-```
-
--
-### Start etcd + registrator on your docker host
-
-Check setup, etcd and registrator need to be running:
-
-```bash
-$ ps -ef |grep etcd
-root      4248     1  0 17:30 ?        00:00:00 /usr/local/bin/etcd -v
-...
-$ ps -ef |grep registrator
-root      4312     1  0 17:33 ?        00:00:00 /usr/local/bin/registrator etcd:///tomcat8
-...
-$ etcdctl ls /
-/tomcat8
-```
-
-Also viable, because it is contained in our spec:
-```bash
-$ ( cd /data/mnt/spec.d && sudo rake spec )
-```
-
-***
-In case of errors:
-
-```bash
-$ /usr/local/bin/start_etcd.sh
-$ /usr/local/bin/start_registrator.sh
-```
-
-
--
-### start apache tomcat 8 container
-
-
-```bash
-$ docker run -tdi \
- -e "SERVICE_NAME=app" \
- --volumes-from status:ro \
- -P rossbachp/tomcat8
-
-e2e2404b36ceb8226e0c723d18b7ea4a6d92134a79d042a6308fe4d36aea2503
-```
-
-Registrator will recognize this and inject data into etcd
-
-```bash
-$ etcdctl ls /tomcat8/app
-/tomcat8/app/docker-workshop:goofy_meitner:8080
-/tomcat8/app/docker-workshop:goofy_meitner:8009
-```
-
-Given a key for Port 8009 (the ajp13 connector), we'll ask etcd:
-
-```bash
-$ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
-127.0.1.1:49153
-```
-
-***
-[check Dockerbox tomcat 8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
-
-
 ---
-## Apache Web Server
+## Start apache installation based upon a fresh container
 
-Start Apache HTTPD installation
+Start demo vm and connect to it
 
-  * based upon a fresh container
-  * install apache packages
-  * configure files and
-  * save the work
+using vagrant:
+```bash
+$ vagrant up
+$ vagrant ssh
+```
+
+OR - log in using virtual box and demo/demo account
+
+***
+-
+Verify vm status
+```bash
+$ cd /data/mnt/spec.d/
+
+$ sudo rake spec
+....
+Finished in 0.7392 seconds
+50 examples, 0 failures
+```
 
 -
 Create a fresh container
@@ -233,14 +176,14 @@ Regular procedure would be `apt-get install ..`, instead we'll install directly 
 $ cd /mnt
 $ dpkg -i *.deb
 ...
-$ which apache
+$ which apache2
 /usr/sbin/apache2
 ```
 ***
   * It's fast and we don't need internet connection at install time!
   * Install a base apache with mod_jk support.
 -
-### Check Apache installation
+### check apache
 
 ```bash
 $ sudo mkdir -p /var/lock/apache2 /var/run/apache2 /var/log/apache2
@@ -272,7 +215,12 @@ Server compiled with....
  -D AP_TYPES_CONFIG_FILE="mime.types"
  -D SERVER_CONFIG_FILE="apache2.conf"
 ```
+-
+### install modjk
 
+```bash
+apt-get install -y libapache2-mod-jk
+```
 -
 ### configure apache mod_jk support
 
@@ -307,15 +255,14 @@ worker.loadbalancer.balance_workers=ajp13_worker
 ```
 
 ***
-CTRL-P CTRL-Q to leave container
+Press CRTL-P -> CRTL-Q to leave container
 
 
 -
-### Add this to your VM!
+### Add on Demo VM:
 
-Config and logs for our apache container will reside on a host volume
-
-(not within container).
+Config and logs for our apache container will reside on a host volume (not within
+container).
 
 So we need some default directories and files to exist, otherwise Apache does not start.
 
@@ -381,8 +328,7 @@ $ exit
 
 ```bash
 $ docker run -d -ti \
- -v /data/apache2-jk-config/workers.properties:\
- /etc/libapache2-mod-jk/workers.properties \
+ -v /data/apache2-jk-config/workers.properties:/etc/libapache2-mod-jk/workers.properties \
  -v /data/apache2-log/:/var/log/apache2/ \
  -p 127.0.0.1:6000:80   \
  --name apache2 \
@@ -418,6 +364,50 @@ $ docker stop apache2
   * [etcd](https://github.com/coreos/etcd)
   * [registrator](https://github.com/progrium/registrator)
 
+-
+### Start etcd + registrator on your docker host
+
+Check setup, etcd and registrator need to be running:
+
+```bash
+$ ps -ef |grep etcd
+root      4248     1  0 17:30 ?        00:00:00 /usr/local/bin/etcd -v
+...
+$ ps -ef |grep registrator
+root      4312     1  0 17:33 ?        00:00:00 /usr/local/bin/registrator etcd:///tomcat8
+...
+$ etcdctl ls /
+/tomcat8
+```
+
+Also viable, because it is contained in our spec:
+```bash
+$ ( cd /data/mnt/spec.d && sudo rake spec )
+```
+
+***
+In case of errors:
+
+```bash
+$ /usr/local/bin/start_etcd.sh
+$ /usr/local/bin/start_registrator.sh
+```
+
+
+-
+### looking at the scripts ...
+
+
+```bash
+$ cat /usr/local/bin/start_etcd.sh
+sudo su - -c "killall etcd; /usr/local/bin/etcd \
+ -v >/var/log/etcd.log 2>&1 &"
+
+$ cat /usr/local/bin/start_registrator.sh
+sudo su - -c "killall registrator; /usr/local/bin/registrator \
+ etcd:///tomcat8 >/var/log/registrator.log 2>&1 &"
+```
+
 ---
 ## Start apache tomcat example
 
@@ -431,7 +421,7 @@ $ docker stop apache2
 ### build test status webapp
 
 ```bash
-$ cd /mnt/docker.d/status
+$ cd /data/mnt/docker.d/status
 $ ./build.sh
 $ docker ps -l
 CONTAINER ID        IMAGE                     COMMAND             CREATED             STATUS                     PORTS               NAMES
@@ -471,6 +461,35 @@ $ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
 ***
 [check Dockerbox tomcat 8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
 
+-
+### Design of rossbachp/tomcat8 docker image
+
+![](images/design-tomcat8-images.png)
+***
+You can deploy your own webapps and tomcat extended library with local volumes. Better alternative: by using a docker data container.
+
+[rossbachp/tomcat8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
+
+-
+## Goals
+
+  * use minimal ubuntu and java8 base images (work in progress)
+  * inject libs and .wars as volumes (hence the data container)
+  * deploy manager app and generate password at start
+  * clean up installation, remove examples and unused `*.bat`, .. files.
+  * squash footprint and clean up build artefacts
+
+-
+## Goals (contd.)
+
+  * use a nicer access log pattern :-)
+  * use a cleaned up server.xml without comments
+    * use separate executor
+    * setup HTTP (8080) and AJP (8009) connectors and expose ports
+    * currently do not support APR Connectors or configure other then standard NIO
+  * reuse existing cool ideas from other nice people. Many thanks ;)
+
+
 ---
 ### workers.properties
 
@@ -479,7 +498,7 @@ We need to create a worker.properties file to access tomcat from httpd.
 At the VM:
 
 ```bash
-$ cd /mnt/dynupd
+$ cd /data/mnt/dynupd
 
 $ ./gen-modjk-workers-etcd-registrator.sh
 $ cat /data/apache2-jk-config/workers.properties
@@ -520,7 +539,7 @@ $ docker ps | grep tomcat8
 f7609e148ad1        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   5 seconds ago       Up 4 seconds        0.0.0.0:49155->8080/tcp, 0.0.0.0:49156->8009/tcp   sick_davinci
 e2e2404b36ce        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   17 minutes ago      Up 17 minutes       0.0.0.0:49153->8009/tcp, 0.0.0.0:49154->8080/tcp   goofy_meitner
 
-$ cd /mnt/dynupd
+$ cd /data/mnt/dynupd
 $ ./gen-modjk-workers-etcd-registrator.sh
 $ cat /data/apache2-jk-config/workers.properties
 $ docker restart apache2
@@ -554,7 +573,7 @@ $ watch 'curl http://127.0.0.1:6000/status/index.jsp'
 ** PLEASE: Open up another shell **
 
 ```bash
-$ cd /mnt/dynupd
+$ cd /data/mnt/dynupd
 $ ./watch.sh
 ```
 
