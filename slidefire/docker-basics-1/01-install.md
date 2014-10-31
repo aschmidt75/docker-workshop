@@ -3,7 +3,8 @@
 
 ## Virtualbox image
 * Have https://www.virtualbox.org/ installed
-* Install and start the workshop VM: 
+* Install and start the workshop VM:
+
   `docker-workshop_docker-workshop-vm_*.ova`
 * Double Click or Virtual Box > File > Import Appliance ...
 * Login: `ssh -p 2200 demo@localhost` Password: demo
@@ -17,7 +18,7 @@
 
 ## Check docker installation
 
-* `docker version` Docker version information
+`docker version` : Docker version information
 ```
   $ docker version
   Client version: 1.3.0
@@ -32,7 +33,7 @@
 ```
 
 
-* `docker info` Information about the Docker installation
+`docker info` : Information about the Docker installation
 ```
   $ docker info
   Containers: 1
@@ -54,7 +55,7 @@
 ```
 
 
-* `docker help` Usage information
+`docker help` : Usage information
 ```
 $ docker help
 Usage: docker [OPTIONS] COMMAND [arg...]
@@ -76,44 +77,14 @@ Commands:
 ```
 
 
-## Check fig installation
+## Local Docker registry
 
-* `fig --version` displays the installed version
-
-```
-$ fig --version
-fig 1.0.0
-```
-
-* `fig` displays usage information
-
-```
-$ fig
-Punctual, lightweight development environments using Docker.
-
-Usage:
-  fig [options] [COMMAND] [ARGS...]
-  fig -h|--help
-
-...
-
-Commands:
-  build     Build or rebuild services
-  help      Get help on a command
-  kill      Kill containers
-  logs      View output from containers
-...
-```
-
-
-## Check local Docker registry
-
-* Start a local registry
+Start a local registry
 ```
 $ /usr/local/bin/start_registry.sh
 ```
 
-* Check local regostry
+Check local regostry
 ```
 $ docker ps -a
 CONTAINER ID        IMAGE                         COMMAND                CREATED             STATUS                       PORTS                      NAMES
@@ -123,6 +94,6 @@ CONTAINER ID        IMAGE                         COMMAND                CREATED
 
 ## Excercise 1
 
-1. Check your Docker and Fig installation.
+1. Check your Docker installation.
 2. Examine available Docker commands. 
 
