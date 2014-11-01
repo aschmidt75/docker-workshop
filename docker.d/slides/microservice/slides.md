@@ -88,7 +88,7 @@ You can deploy your own webapps and tomcat extended library with local volumes. 
 ```bash
 $ cd /data/mnt/docker.d/status
 $ ./build.sh
-$ docker images
+$ docker images | grep status
 REPOSITORY                                   TAG                   IMAGE ID            CREATED             VIRTUAL SIZE
 rossbachp/status                             latest                247d45c61768        2 seconds ago       2.434 MB
 $ docker ps -l
@@ -105,7 +105,6 @@ App reported version of Tomcat, hostname and current date.
 ```bash
 $ cat build.sh
 #!/bin/bash
-sudo apt-get install -y zip
 cd status
 zip -r ../status.war .
 cd ..
@@ -517,7 +516,7 @@ Yep, successfull. Hostname == container ID
 $ docker run -tdi -e "SERVICE_NAME=app" --volumes-from status:ro \
  -P rossbachp/tomcat8
 
-$ docker ps | grep tomcat8
+  $ docker ps | grep tomcat8
 f7609e148ad1        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   5 seconds ago       Up 4 seconds        0.0.0.0:49155->8080/tcp, 0.0.0.0:49156->8009/tcp   sick_davinci
 e2e2404b36ce        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   17 minutes ago      Up 17 minutes       0.0.0.0:49153->8009/tcp, 0.0.0.0:49154->8080/tcp   goofy_meitner
 
@@ -538,7 +537,7 @@ $ curl http://127.0.0.1:6000/status/index.jsp
 ```
 
 ```bash
-$ curl http://127.0.0.1:6000/status/index.jsp
+$ curl -s http://127.0.0.1:6000/status/index.jsp
 
   <li>Hostname : f7609e148ad1</li>
 ...
@@ -546,7 +545,7 @@ $ curl http://127.0.0.1:6000/status/index.jsp
 
 Optionally, in another shell:
 ```bash
-$ watch 'curl http://127.0.0.1:6000/status/index.jsp'
+$ watch 'curl -s http://127.0.0.1:6000/status/index.jsp'
 ```
 
 -
@@ -587,11 +586,14 @@ $ docker stop <tomcat container id>
 -
 ### add jkstatus mapping
 
-.. by entering a running container via `docker-enter`!
+.. by entering a running container via `docker exec`!
 
 ```bash
 $ sudo /bin/bash
-$ docker-enter <apache container-id> /bin/bash`
+$ CID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
+$ echo $CID
+d6a73998cec6
+$ docker exec -ti $CID /bin/bash
 $ CF=/etc/apache2/sites-enabled/000-default.conf
 $ sed -i 's/<\/VirtualHost>/\n\tJkMountCopy ON\n<\/VirtualHost>/g' $CF
 
@@ -603,8 +605,8 @@ $ exit
 ### gracefully restart apache
 
 ```bash
-$ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
-$ sudo docker-enter $ID /bin/bash
+$ CID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
+$ docker exec -ti $CID /bin/bash
 
 $ /bin/bash -c \
  "source /etc/apache2/envvars && exec /usr/sbin/apachectl graceful"
@@ -614,19 +616,20 @@ Check jk-status at your docker-workshop host
 
 ```bash
 $ curl -s http://127.0.0.1:6000/jk-status?mime=prop | grep address
-worker.goofy_meitner.address=172.17.42.1:49153
-worker.sick_davinci.address=172.17.42.1:49156
+worker.elegant_colden.address=172.17.42.1:49153
+worker.goofy_brown.address=172.17.42.1:49155
+worker.sad_lalande.address=172.17.42.1:49158
 ```
 -
 ### Commit changes in apache image
 
 ```bash
-$ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
-$ echo $ID
-9794b009031d
-$ docker stop $ID
-$ docker commit $ID apache2:0.2
-0a5a66dd5ae876b6e01ce454c4c3679d32b42980ffd97b42a2572fbb41b580f5
+$ CID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
+$ echo $CID
+d6a73998cec6
+$ docker stop $CID
+$ docker commit $CID apache2:0.2
+c52ac440697fba641f65039848571d86dd02911ff05f969ee945358fe793e976
 $ docker images | grep apache2
 apache2  0.2  ae7da438a1ba  9 seconds ago  209.4 MB
 ...
@@ -635,12 +638,13 @@ apache2  0.2  ae7da438a1ba  9 seconds ago  209.4 MB
 -
 ## Restart apache2
 ```bash
-$ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
-$ docker stop $ID
-$ docker rm $ID
+$ CID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
+$ docker stop $CID
+$ docker rm $CID
+$ F_HOST_WORKERS=/data/apache2-jk-config/workers.properties
+$ F_CONTAINER_WORKERS=/etc/libapache2-mod-jk/workers.properties
 $ docker run -d -ti \
- -v /data/apache2-jk-config/workers.properties:\
- /etc/libapache2-mod-jk/workers.properties \
+ -v $F_HOST_WORKERS:$F_CONTAINER_WORKERS \
  -v /data/apache2-log/:/var/log/apache2/ \
  -p 127.0.0.1:6000:80   \
  --name apache2 \
@@ -648,7 +652,33 @@ $ docker run -d -ti \
  /bin/bash -c \
  "source /etc/apache2/envvars && exec /usr/sbin/apache2 -D FOREGROUND"
 ```
+-
+### Better watch.sh
 
+```bash
+#!/bin/bash
+
+source dynupd.source
+
+while true; do
+  echo -n "."
+  etcdctl watch --recursive ${ETCD_KEY}/${APP_NAME} >/dev/null
+  echo -n "+"
+
+  sleep 2
+  ./gen-modjk-workers-etcd-registrator-elegant.sh
+  docker exec apache2 /usr/sbin/apache2ctl graceful >/dev/null
+done
+```
+-
+## Exercices
+
+  * add `gen-modjk-workers-etcd-registrator-elegant.sh` to file `watch.sh`
+  * start watcher again
+  * start/stop tomcat
+  * add new applications
+  * check jkstatus
+  * watch results
 
 ***
 FIN
@@ -667,7 +697,8 @@ FIN
     * setup log volumes or install logstash-forwarder
   * add jkstatus to the config
   * optimize worker.properties generation
-  * check nsenter graceful httpd restart
+  * check `docker exec ...` graceful httpd restart
+    - `docker exec $CID '/bin/bash -c "/usr/sbin/apachectl graceful"'`
 
 ***
 It´s up to you!
