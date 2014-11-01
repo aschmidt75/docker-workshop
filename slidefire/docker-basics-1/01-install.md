@@ -16,9 +16,8 @@
   ```
 
 
-## Check docker installation
+## docker version
 
-`docker version` : Docker version information
 ```
   $ docker version
   Client version: 1.3.0
@@ -33,7 +32,8 @@
 ```
 
 
-`docker info` : Information about the Docker installation
+## docker info
+
 ```
   $ docker info
   Containers: 1
@@ -55,7 +55,8 @@
 ```
 
 
-`docker help` : Usage information
+## docker help
+
 ```
 $ docker help
 Usage: docker [OPTIONS] COMMAND [arg...]
@@ -79,13 +80,13 @@ Commands:
 
 ## Local Docker registry
 
-Start a local registry
 ```
+# start a local registry
 $ /usr/local/bin/start_registry.sh
 ```
 
-Check local regostry
 ```
+# check local registry
 $ docker ps -a
 CONTAINER ID        IMAGE                         COMMAND                CREATED             STATUS                       PORTS                      NAMES
 5bb7620b2b47        registry:latest               "/bin/sh -c 'exec do   14 minutes ago      Up 14 minutes                127.0.0.1:5000->5000/tcp   registry

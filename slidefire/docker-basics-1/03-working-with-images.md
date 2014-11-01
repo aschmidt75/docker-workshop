@@ -21,6 +21,7 @@ registry                              latest                8e9a29f977a7        
 $ docker tag 127.0.0.1:5000/ubuntu myubuntu
 ```
 
+
 ## docker rmi
 
 ```
