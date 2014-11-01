@@ -333,11 +333,11 @@ $ touch workers.properties
 Use `docker commit` to create an image from installed apache httpd container
 
 ```bash
-$ ID=$(docker ps -l | awk '/^[0-9a-f]/{print $1}')
-$ echo $ID
+$ CID=$(docker ps -lq)
+$ echo $CID
 26936f69cc5b
 
-$ docker commit $ID apache2:0.1
+$ docker commit $CID apache2:0.1
 0a5a66dd5ae876b6e01ce454c4c3679d32b42980ffd97b42a2572fbb41b580f5
 
 $ docker images | grep apache2
@@ -350,8 +350,8 @@ apache2  0.1 0 a5a66dd5ae8 25 seconds ago 209.4 MB
 We don't need our intermediate install container anymore:
 
 ```bash
-docker stop $ID
-docker rm $ID
+docker stop $CID
+docker rm $CID
 ```
 
 ---
@@ -380,9 +380,10 @@ $ exit
 ## start the apache container
 
 ```bash
+$ F_HOST_WORKERS=/data/apache2-jk-config/workers.properties
+$ F_CONTAINER_WORKERS=/etc/libapache2-mod-jk/workers.properties
 $ docker run -d -ti \
- -v /data/apache2-jk-config/workers.properties:\
- /etc/libapache2-mod-jk/workers.properties \
+ -v $F_HOST_WORKERS:$F_CONTAINER_WORKERS \
  -v /data/apache2-log/:/var/log/apache2/ \
  -p 127.0.0.1:6000:80   \
  --name apache2 \
