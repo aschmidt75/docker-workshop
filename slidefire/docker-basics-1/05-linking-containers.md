@@ -1,4 +1,4 @@
-# Linking containers
+# 5) Linking containers
 
 
 * `docker run [OPTIONS] IMAGE [COMMAND] [ARG...]`

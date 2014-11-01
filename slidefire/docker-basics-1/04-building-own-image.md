@@ -1,4 +1,6 @@
-# Building your own image
+# 4) Building images
+
+
 
 * `docker build PATH` Build a new image from the source path
 
