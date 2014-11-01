@@ -32,10 +32,6 @@ Vagrant.configure("2") do |config|
     s.vm.provision "shell", path: 'provision.d/02_os_remove_unwanted.sh'
     s.vm.provision "shell", path: 'provision.d/05_fix_locales.sh'
 
-    # -- PART Microservices
-    # download stuff we need as packages, so we do not need
-    # wifi during the workshop
-    s.vm.provision "shell", path: 'provision.d/30_apache_packages.sh'
 
     # install puppet module for docker
     # image already contains puppet
@@ -43,14 +39,20 @@ Vagrant.configure("2") do |config|
 
     # provision the node
     s.vm.provision :puppet, :options => "--verbose" do |puppet|
- 	puppet.manifests_path = "puppet.d/manifests"
-	puppet.module_path = "puppet.d/modules"
+    puppet.manifests_path = "puppet.d/manifests"
+    puppet.module_path = "puppet.d/modules"
         puppet.manifest_file = "default.pp"
     end
 
     # demo user fix
     s.vm.provision "shell", inline:
-	    'sudo usermod -G docker demo'
+      'sudo usermod -G docker demo'
+
+    # -- PART Microservices
+    # download stuff we need as packages, so we do not need
+    # wifi during the workshop
+    s.vm.provision "shell", path: 'provision.d/30_apache_packages.sh'
+
 
     # install nsenter
     # from: https://blog.codecentric.de/2014/07/vier-wege-in-den-docker-container/

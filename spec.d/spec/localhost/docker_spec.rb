@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'It should have docker installed' do
-	describe package 'lxc-docker-1.3.0' do
+	describe package 'lxc-docker-1.3.1' do
 		it { should be_installed }
 	end
 
