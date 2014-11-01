@@ -678,7 +678,7 @@ done
   * start/stop tomcat
   * add new applications
   * check jkstatus
-  * watch results
+  * watch result
 
 ***
 FIN
@@ -699,6 +699,7 @@ FIN
   * optimize worker.properties generation
   * check `docker exec ...` graceful httpd restart
     - `docker exec $CID '/bin/bash -c "/usr/sbin/apachectl graceful"'`
+  * use fig to coordinate and config the swarm!
 
 ***
 It´s up to you!
