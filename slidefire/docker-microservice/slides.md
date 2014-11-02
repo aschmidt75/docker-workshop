@@ -39,13 +39,12 @@
 ### Definition of the axis
 
   * X-axis scaling
-    - X-axis scaling consists of running multiple copies of an application behind a load balancer
+    - running multiple copies of an application behind a load balancer
   * Y-axis scaling
-    - Unlike X-axis and Z-axis, which consist of running multiple, identical copies of the application
-    - Y-axis axis scaling splits the application into multiple, different services.
+    - Splits the application into multiple, different services.
     - Each service is responsible for one or more closely related functions.
   * Z-axis scaling
-    - When using Z-axis scaling each server runs an identical copy of the code.
+    - Scaling each server runs an identical copy of the code.
 -
 ### Example Architecture
 
@@ -194,16 +193,18 @@ $ curl http://$IP:8000/status/index.jsp
 </html>
 ```
 -
-### stop status tomcat
+### Clean up
 
 ```bash
 $ CID=$(docker ps -lq)
 $ docker stop $CID
 $ docker rm $CID
 ```
+***
+  * stop tomcat container
+  * remove it
 
 ---
-## Register Tomcat Container
 ### Service Discovery with etcd and Registrator to scale out!
 
 ![](images/etcd-registrator-watch.png)
@@ -699,10 +700,7 @@ $ exit
 
 ```bash
 $ CID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
-$ docker exec -ti $CID /bin/bash
-
-$ /bin/bash -c \
- "source /etc/apache2/envvars && exec /usr/sbin/apachectl graceful"
+$ docker exec $CID /usr/sbin/apache2ctl graceful
 ```
 
 Check jk-status at your docker-workshop host
@@ -763,6 +761,10 @@ while true; do
   docker exec apache2 /usr/sbin/apache2ctl graceful >/dev/null
 done
 ```
+***
+  - Support jkstatus
+  - use worker template
+
 -
 ## Exercices for you!
 
