@@ -3,7 +3,7 @@
 * [<andreas.schmidt@cassini.de>](mailto:andreas.schmidt@cassini.de)  |  @aschmidt75
 * [<peter.rossbach@bee42.com>](mailto:peter.rossbach@bee42.com)  |  @PRossbach
 ---
-## What we want?
+## What we like to show
 
   * Test the newest kids on the IT-block
   * Construct a microservice environment form scratch
@@ -23,41 +23,15 @@
     - deployed in single or multiple servers.
 ***
 [Microservice Architecture – A Quick Guide](http://www.javacodegeeks.com/2014/06/microservice-architecture-a-quick-guide.html)
--
-### Why Microservices? -*1*
-
-  * Each micro service is small and focused on a specific feature / business requirement.
-  * Microservice can be developed independently by small team of developers (normally 2 to 5 developers).
-  * Microservice is loosely coupled, means services are independent, in terms of development and deployment both.
-  * Microservice can be developed using different programming language (Personally I don’t suggest to do it).
-  * Microservice allows easy and flexible way to integrate automatic deployment with Continuous Integration tools (for e.g: Jenkins, Hudson, bamboo etc..).
-  * The productivity of a new team member will be quick enough.
--
-### Why Microservices? -*2*
-
-  * Microservice is easy to understand, modify and maintain for a developer because separation of code,small team and focused work.
-  * Microservice allows you to take advantage of emerging and latest technologies (framework, programming language , programming practice, etc.).
-  * Microservice has code for business logic only, No mixup with HTML,CSS or other UI component.
-  * Microservice is easy to scale based on demand.
-  * Microservice can deploy on commodity hardware or low / medium configuration servers.
-  * Easy to integrate 3rd party service.
-  * Every microservice has it’s own storage capability but it depends on the project’s requirement, you can have common database like MySQL or Oracle for all services.
--
-### Microservice Disadvantages
-
-  * Microservice architecture brings a lot of operations overhead.
-  * DevOps Skill required (http://en.wikipedia.org/wiki/DevOps).
-  * Duplication of Effort.
-  * Distributed System is complicated to manage .
-  * Default to trace problem because of distributed deployment.
-  * Complicated to manage whole products when number of services increases.
 
 ---
-## Microservice - Scale Cube
+## Web - Scale Cube
 
 ![](images/scale-cube.jpg)
 ***
-[ScaleCube](http://microservices.io/articles/scalecube.html)
+  - [Microserice <=> Scale Cube](http://microservices.io/articles/scalecube.html)
+  - [THE ART OF SCALABILITY - ABBOTT & FISHER - 2009](http://theartofscalability.com/)
+
 -
 ### Definition of the axis
 
@@ -70,7 +44,7 @@
   * Z-axis scaling
     - When using Z-axis scaling each server runs an identical copy of the code.
 -
-### Example Architectur
+### Example Architecture
 
 ![](images/web-architectur-simple.png)
 
@@ -82,29 +56,209 @@
   * Build docker container for every peaces
   * Managed the scaling with a service discovery (ETCD)
   * Make it better
+
 ---
-## install docker
+## Apache Tomcat
+
+ * create status webapp
+ * start tomcat container
+ * register tomcat container
+ * check loadbalacing via apache httpd
+ * start another one
+
+-
+### Design of rossbachp/tomcat8 docker image
+
+![](images/design-tomcat8-images.png)
+***
+  - You can deploy your own webapps
+  - Add extended library with Docker data container.
+  - optimizied configuration
+  - find at github [rossbachp/tomcat8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
+
+-
+## Goals
+
+  * use minimal ubuntu and java8 base images (work in progress)
+  * inject libs and .wars as volumes (hence the data container)
+  * deploy manager app and generate password at start
+  * clean up installation, remove examples and unused `*.bat`, .. files.
+  * squash footprint and clean up build artefacts
+
+-
+### build test status webapp
 
 ```bash
-  sudo apt-get install -yqq apt-transport-https
-  dig keyserver.ubuntu.com
-  sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 \
-   --recv-keys  36A1D7869245C8950F966E92D8576A8BA88D21E9
-  sudo sh -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
-  sudo apt-get update -yqq
-  sudo apt-get install -yqq lxc-docker
+$ cd /data/mnt/docker.d/status
+$ ./build.sh
+$ docker images | grep status
+REPOSITORY                                   TAG                   IMAGE ID            CREATED             VIRTUAL SIZE
+rossbachp/status                             latest                247d45c61768        2 seconds ago       2.434 MB
+$ docker ps -l
+CONTAINER ID        IMAGE                     COMMAND             CREATED             STATUS                     PORTS               NAMES
+c04254e1715d        rossbachp/status:latest   "/bin/sh -c true"   6 seconds ago       Exited (0) 6 seconds ago                       status
 ```
----
-## Start apache installation based upon a fresh container
+***
+  - It's a volume container, it contains only executable code
+    - but it does not execute
+  - App reported version of Tomcat, hostname and current date.
 
-Start vagrant vm and connect to it:
+-
+### How it is being built
 ```bash
-$ vagrant up
-$ vagrant ssh
+$ cat build.sh
+#!/bin/bash
+cd status
+zip -r ../status.war .
+cd ..
+sudo docker build -t="rossbachp/status" .
+sudo docker run --name=status rossbachp/status
+rm status.war
 ```
-OR - log in using virtual box and demo/demo account
+***
+  - we not used jar, simple zip!
+  - simple JSP
+-
+## status.jsp
+
+```jsp
+<%@ page session="false" %>
+<%
+java.text.DateFormat dateFormat =
+  new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+%>
+<html>
+<body>
+<h1>Docker Tomcat Status page</h1>
+
+<ul>
+  <li>Hostname : <%= java.net.InetAddress.getLocalHost().getHostName() %></li>
+  <li>Tomcat Version : <%= application.getServerInfo() %></li>
+  <li>Servlet Specification Version : <%= application.getMajorVersion() %>.<%= application.getMinorVersion() %></li>
+  <li>JSP version : <%=JspFactory.getDefaultFactory().getEngineInfo().getSpecificationVersion() %></li>
+  <li>Now : <%= dateFormat.format(new java.util.Date()) %></li>
+</ul>
+</body>
+</html>
+```  
+
+-
+### build test status webapp
+
+```bash
+$ cd /mnt/docker.d/status
+$ ./build.sh
+$ docker ps -l
+CONTAINER ID        IMAGE                     COMMAND             CREATED             STATUS                     PORTS               NAMES
+c04254e1715d        rossbachp/status:latest   "/bin/sh -c true"   6 seconds ago       Exited (0) 6 seconds ago                       status
+```
 
 ***
+App reported version of Tomcat, hostname and current date.
+
+---
+## Register Tomcat Container
+### Service Discovery with etcd and Registrator to scale out!
+
+![](images/etcd-registrator-watch.png)
+
+  * [etcd](https://github.com/coreos/etcd)
+  * [registrator](https://github.com/progrium/registrator)
+
+-
+### Start etcd + registrator on your docker host
+
+Check setup, etcd and registrator need to be running:
+
+```bash
+$ ps -ef |grep etcd
+root      4248     1  0 17:30 ?        00:00:00 /usr/local/bin/etcd -v
+...
+$ ps -ef |grep registrator
+root      4312     1  0 17:33 ?        00:00:00 /usr/local/bin/registrator etcd:///tomcat8
+...
+$ etcdctl ls /
+/tomcat8
+```
+
+Also viable, because it is contained in our spec:
+```bash
+$ ( cd /data/mnt/spec.d && sudo rake spec )
+```
+
+***
+In case of errors:
+
+```bash
+$ /usr/local/bin/start_etcd.sh
+$ /usr/local/bin/start_registrator.sh
+```
+
+-
+### Start Apache Tomcat 8 container
+
+
+```bash
+$ docker run -tdi \
+ -e "SERVICE_NAME=app" \
+ --volumes-from status:ro \
+ -P rossbachp/tomcat8
+
+e2e2404b36ceb8226e0c723d18b7ea4a6d92134a79d042a6308fe4d36aea2503
+```
+
+Registrator will recognize this and inject data into etcd
+
+```bash
+$ etcdctl ls /tomcat8/app
+/tomcat8/app/docker-workshop:goofy_meitner:8080
+/tomcat8/app/docker-workshop:goofy_meitner:8009
+```
+
+Given a key for Port 8009 (the ajp13 connector), we'll ask etcd:
+
+```bash
+$ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
+127.0.1.1:49153
+```
+
+***
+[check Peter's Dockerbox tomcat 8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
+
+-
+-
+### check status
+
+```
+$ CID=$(docker ps -lq)
+$ IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
+$ curl http://$IP:8000/status/index.jsp
+<html>
+<body>
+<h1>Docker Tomcat Status page</h1>
+
+<ul>
+  <li>Hostname : a222c4e3f231</li>
+  <li>Tomcat Version : Apache Tomcat/8.0.11</li>
+  <li>Servlet Specification Version : 3.1</li>
+  <li>JSP version : 2.3</li>
+  <li>Now : 2014/11/02 17:38:32</li>
+</ul>
+</body>
+</html>
+```
+
+---
+## Apache Web Server
+
+Start Apache HTTPD installation
+
+  * based upon a fresh container
+  * install apache packages
+  * configure files and
+  * save the work
+
+-
 Create a fresh container
 
 ```bash
@@ -112,8 +266,8 @@ $ docker run -ti -v /data/packages:/mnt ubuntu /bin/bash
 root@26936f69cc5b:/#
 ```
 ***
-Installation __step by step__
-
+  - Installation __step by step__
+  - Really docker hands on!
 -
 ### contents of `/data/packages`
 ```bash
@@ -158,7 +312,7 @@ $ which apache
   * It's fast and we don't need internet connection at install time!
   * Install a base apache with mod_jk support.
 -
-### check apache
+### Check Apache installation
 
 ```bash
 $ sudo mkdir -p /var/lock/apache2 /var/run/apache2 /var/log/apache2
@@ -190,12 +344,7 @@ Server compiled with....
  -D AP_TYPES_CONFIG_FILE="mime.types"
  -D SERVER_CONFIG_FILE="apache2.conf"
 ```
--
-### install modjk
 
-```bash
-apt-get install -y libapache2-mod-jk
-```
 -
 ### configure apache mod_jk support
 
@@ -236,7 +385,11 @@ CTRL-P CTRL-Q to leave container
 -
 ### Add this to your VM!
 
-We need some default directories and files to exist, otherwise Apache does not start.
+Config and logs for our apache container will reside on a host volume
+
+(not within container).
+
+So we need some default directories and files to exist, otherwise Apache does not start.
 
 ```bash
 $ cd /data
@@ -252,11 +405,11 @@ $ touch workers.properties
 Use `docker commit` to create an image from installed apache httpd container
 
 ```bash
-$ ID=$(docker ps -l | awk '/^[0-9a-f]/{print $1}')
-$ echo $ID
+$ CID=$(docker ps -lq)
+$ echo $CID
 26936f69cc5b
 
-$ docker commit $ID apache2:0.1
+$ docker commit $CID apache2:0.1
 0a5a66dd5ae876b6e01ce454c4c3679d32b42980ffd97b42a2572fbb41b580f5
 
 $ docker images | grep apache2
@@ -269,8 +422,8 @@ apache2  0.1 0 a5a66dd5ae8 25 seconds ago 209.4 MB
 We don't need our intermediate install container anymore:
 
 ```bash
-docker stop $ID
-docker rm $ID
+docker stop $CID
+docker rm $CID
 ```
 
 ---
@@ -299,9 +452,10 @@ $ exit
 ## start the apache container
 
 ```bash
+$ F_HOST_WORKERS=/data/apache2-jk-config/workers.properties
+$ F_CONTAINER_WORKERS=/etc/libapache2-mod-jk/workers.properties
 $ docker run -d -ti \
- -v /data/apache2-jk-config/workers.properties:\
- /etc/libapache2-mod-jk/workers.properties \
+ -v $F_HOST_WORKERS:$F_CONTAINER_WORKERS \
  -v /data/apache2-log/:/var/log/apache2/ \
  -p 127.0.0.1:6000:80   \
  --name apache2 \
@@ -331,62 +485,24 @@ OK, we did not yet configure and start our tomcat backends...
 $ docker stop apache2
 ```
 ---
-### Service Discovery with etcd and Registrator to scale out!
+## Review
 ![](images/etcd-registrator-watch.png)
 
   * [etcd](https://github.com/coreos/etcd)
   * [registrator](https://github.com/progrium/registrator)
 
--
-### Start etcd + registrator on your docker host
-
-```bash
-$ /usr/local/bin/start_etcd.sh
-$ /usr/local/bin/start_registrator.sh
-```
-
-check setup
-
-```bash
-$ ps -ef |grep etcd
-root      4248     1  0 17:30 ?        00:00:00 /usr/local/bin/etcd -v
-...
-$ ps -ef |grep registrator
-root      4312     1  0 17:33 ?        00:00:00 /usr/local/bin/registrator etcd:///tomcat8
-...
-$ etcdctl ls /
-/tomcat8
-```
-
--
-### looking at the scripts ...
-
-
-```bash
-$ cat /usr/local/bin/start_etcd.sh
-sudo su - -c "killall etcd; /usr/local/bin/etcd \
- -v >/var/log/etcd.log 2>&1 &"
-
-$ cat /usr/local/bin/start_registrator.sh
-sudo su - -c "killall registrator; /usr/local/bin/registrator \
- etcd:///tomcat8 >/var/log/registrator.log 2>&1 &"
-```
-
 ---
-## Start apache tomcat example
-
- * create status webapp
- * start tomcat container
- * register tomcat container
- * check loadbalacing via apache httpd
- * start another one
+## Status and next steps
+### Start apache tomcat example
+  - status app available
+  - apache running
+  - service discovery running
+  - we must start a tomcat
 
 -
-### build test status webapp
+### check test status webapp
 
 ```bash
-$ cd /mnt/docker.d/status
-$ ./build.sh
 $ docker ps -l
 CONTAINER ID        IMAGE                     COMMAND             CREATED             STATUS                     PORTS               NAMES
 c04254e1715d        rossbachp/status:latest   "/bin/sh -c true"   6 seconds ago       Exited (0) 6 seconds ago                       status
@@ -423,36 +539,7 @@ $ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
 ```
 
 ***
-[check Dockerbox tomcat 8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
-
--
-### Design of rossbachp/tomcat8 docker image
-
-![](images/design-tomcat8-images.png)
-***
-You can deploy your own webapps and tomcat extended library with local volumes. Better alternative: by using a docker data container.
-
-[rossbachp/tomcat8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
-
--
-## Goals
-
-  * use minimal ubuntu and java8 base images (work in progress)
-  * inject libs and .wars as volumes (hence the data container)
-  * deploy manager app and generate password at start
-  * clean up installation, remove examples and unused `*.bat`, .. files.
-  * squash footprint and clean up build artefacts
-
--
-## Goals (contd.)
-
-  * use a nicer access log pattern :-)
-  * use a cleaned up server.xml without comments
-    * use separate executor
-    * setup HTTP (8080) and AJP (8009) connectors and expose ports
-    * currently do not support APR Connectors or configure other then standard NIO
-  * reuse existing cool ideas from other nice people. Many thanks ;)
-
+[check rossbachp/tomcat8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
 
 ---
 ### workers.properties
@@ -471,7 +558,7 @@ $ docker restart apache2
 ```
 
 -
-### check status
+### check status via apache
 
 ```
 $ curl http://127.0.0.1:6000/status/index.jsp
@@ -499,7 +586,7 @@ Yep, successfull. Hostname == container ID
 $ docker run -tdi -e "SERVICE_NAME=app" --volumes-from status:ro \
  -P rossbachp/tomcat8
 
-$ docker ps | grep tomcat8
+  $ docker ps | grep tomcat8
 f7609e148ad1        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   5 seconds ago       Up 4 seconds        0.0.0.0:49155->8080/tcp, 0.0.0.0:49156->8009/tcp   sick_davinci
 e2e2404b36ce        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   17 minutes ago      Up 17 minutes       0.0.0.0:49153->8009/tcp, 0.0.0.0:49154->8080/tcp   goofy_meitner
 
@@ -520,15 +607,15 @@ $ curl http://127.0.0.1:6000/status/index.jsp
 ```
 
 ```bash
-$ curl http://127.0.0.1:6000/status/index.jsp
+$ curl -s http://127.0.0.1:6000/status/index.jsp
 
   <li>Hostname : f7609e148ad1</li>
 ...
 ```
 
-Optionally, in another shell:
+Optionally, in **another shell**:
 ```bash
-$ watch 'curl http://127.0.0.1:6000/status/index.jsp'
+$ watch 'curl -s http://127.0.0.1:6000/status/index.jsp'
 ```
 
 -
@@ -569,11 +656,14 @@ $ docker stop <tomcat container id>
 -
 ### add jkstatus mapping
 
-.. by entering a running container via `docker-enter`!
+.. by entering a running container via `docker exec`!
 
 ```bash
 $ sudo /bin/bash
-$ docker-enter <apache container-id> /bin/bash`
+$ CID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
+$ echo $CID
+d6a73998cec6
+$ docker exec -ti $CID /bin/bash
 $ CF=/etc/apache2/sites-enabled/000-default.conf
 $ sed -i 's/<\/VirtualHost>/\n\tJkMountCopy ON\n<\/VirtualHost>/g' $CF
 
@@ -585,8 +675,8 @@ $ exit
 ### gracefully restart apache
 
 ```bash
-$ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
-$ sudo docker-enter $ID /bin/bash
+$ CID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
+$ docker exec -ti $CID /bin/bash
 
 $ /bin/bash -c \
  "source /etc/apache2/envvars && exec /usr/sbin/apachectl graceful"
@@ -596,19 +686,20 @@ Check jk-status at your docker-workshop host
 
 ```bash
 $ curl -s http://127.0.0.1:6000/jk-status?mime=prop | grep address
-worker.goofy_meitner.address=172.17.42.1:49153
-worker.sick_davinci.address=172.17.42.1:49156
+worker.elegant_colden.address=172.17.42.1:49153
+worker.goofy_brown.address=172.17.42.1:49155
+worker.sad_lalande.address=172.17.42.1:49158
 ```
 -
 ### Commit changes in apache image
 
 ```bash
-$ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
-$ echo $ID
-9794b009031d
-$ docker stop $ID
-$ docker commit $ID apache2:0.2
-0a5a66dd5ae876b6e01ce454c4c3679d32b42980ffd97b42a2572fbb41b580f5
+$ CID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
+$ echo $CID
+d6a73998cec6
+$ docker stop $CID
+$ docker commit $CID apache2:0.2
+c52ac440697fba641f65039848571d86dd02911ff05f969ee945358fe793e976
 $ docker images | grep apache2
 apache2  0.2  ae7da438a1ba  9 seconds ago  209.4 MB
 ...
@@ -617,12 +708,13 @@ apache2  0.2  ae7da438a1ba  9 seconds ago  209.4 MB
 -
 ## Restart apache2
 ```bash
-$ ID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
-$ docker stop $ID
-$ docker rm $ID
+$ CID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
+$ docker stop $CID
+$ docker rm $CID
+$ F_HOST_WORKERS=/data/apache2-jk-config/workers.properties
+$ F_CONTAINER_WORKERS=/etc/libapache2-mod-jk/workers.properties
 $ docker run -d -ti \
- -v /data/apache2-jk-config/workers.properties:\
- /etc/libapache2-mod-jk/workers.properties \
+ -v $F_HOST_WORKERS:$F_CONTAINER_WORKERS \
  -v /data/apache2-log/:/var/log/apache2/ \
  -p 127.0.0.1:6000:80   \
  --name apache2 \
@@ -630,7 +722,33 @@ $ docker run -d -ti \
  /bin/bash -c \
  "source /etc/apache2/envvars && exec /usr/sbin/apache2 -D FOREGROUND"
 ```
+-
+### Better watch.sh
 
+```bash
+#!/bin/bash
+
+source dynupd.source
+
+while true; do
+  echo -n "."
+  etcdctl watch --recursive ${ETCD_KEY}/${APP_NAME} >/dev/null
+  echo -n "+"
+
+  sleep 2
+  ./gen-modjk-workers-etcd-registrator-elegant.sh
+  docker exec apache2 /usr/sbin/apache2ctl graceful >/dev/null
+done
+```
+-
+## Exercices for you!
+
+  * add `gen-modjk-workers-etcd-registrator-elegant.sh` to file `watch.sh`
+  * start watcher again
+  * start/stop tomcat
+  * add new applications
+  * check jkstatus
+  * watch result
 
 ***
 FIN
@@ -649,7 +767,9 @@ FIN
     * setup log volumes or install logstash-forwarder
   * add jkstatus to the config
   * optimize worker.properties generation
-  * check nsenter graceful httpd restart
+  * check `docker exec ...` graceful httpd restart
+    - `docker exec $CID '/bin/bash -c "/usr/sbin/apachectl graceful"'`
+  * use fig to coordinate and config the swarm!
 
 ***
 It´s up to you!
