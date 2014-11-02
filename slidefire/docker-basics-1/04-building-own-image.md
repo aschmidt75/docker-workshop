@@ -56,6 +56,37 @@ CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
 * `ENTRYPOINT ["<command>", "<arg 1>", "<arg 2>"]` run the commands when container is launched. Command line args will be passed on.
 
 
-## Excercise 4 
+## Excercise 4
 
-TODO
+1. Build a plain nginx image with a new Dockerfile and start it
+2. Add a custom index.html
+3. Check nginx configuration during build time (nginx -t)
+4. Add custom logging
+
+```
+# /etc/nginx/conf.d/logging.conf
+    access_log /run/nginx/access.log;
+    error_log /run/nginx/error.log;
+``
+
+<!--
+Solution:
+
+# Dockerfile
+FROM nginx
+
+ADD www /var/www/html
+ADD ./logging.conf /etc/nginx/conf.d/logging.conf
+
+RUN mkdir /run/nginx
+RUN nginx -t
+
+
+# logging.conf
+    access_log /run/nginx/access.log;
+    error_log /run/nginx/error.log;
+
+# www/index.html
+Hallo Docker Workshop!
+
+-->
