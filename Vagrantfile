@@ -15,17 +15,21 @@ Vagrant.configure("2") do |config|
   config.vm.hostname 	= 'docker-workshop'
 
   config.vm.define "docker-workshop-vm", primary: true do |s|
+
     # mounts
     s.vm.synced_folder "spec.d/", "/mnt/spec.d"
     s.vm.synced_folder "docker.d/", "/mnt/docker.d"
     s.vm.synced_folder "suppl/dynupd-etcd-registrator", "/mnt/dynupd"
     s.vm.synced_folder "suppl/bin", "/mnt/bin"
+    s.vm.synced_folder "slidefire", "/mnt/slidefire"
 
     # memory settings
     s.vm.provider "virtualbox" do |vb|
     	vb.gui = false
         vb.customize [ "modifyvm", :id, "--memory", "1024"]
-        vb.customize [ "modifyvm", :id, "--cpus", "1"]
+        vb.customize [ "modifyvm", :id, "--cpus", "2"]
+      vb.name = 'docker-workshop'
+
     end
 
     s.vm.provision "shell", path: 'provision.d/01_os_initial.sh'
