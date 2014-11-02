@@ -1,9 +1,12 @@
-# Scaling Apache Tomcat in a Docker-based infrastructure
+## Scaling Apache Tomcat in a Docker-based infrastructure
 
 * [<andreas.schmidt@cassini.de>](mailto:andreas.schmidt@cassini.de)  |  @aschmidt75
 * [<peter.rossbach@bee42.com>](mailto:peter.rossbach@bee42.com)  |  @PRossbach
+
+![](images/ship-container-with-a-bee.png)
+
 ---
-## What we like to show
+## What we like to show?
 
   * Test the newest kids on the IT-block
   * Construct a microservice environment form scratch
@@ -116,7 +119,7 @@ sudo docker run --name=status rossbachp/status
 rm status.war
 ```
 ***
-  - we not used jar, simple zip!
+  - we don't use jar, simple zip!
   - simple JSP
 -
 ## status.jsp
@@ -146,7 +149,7 @@ java.text.DateFormat dateFormat =
 ### build test status webapp
 
 ```bash
-$ cd /mnt/docker.d/status
+$ cd /data/mnt/docker.d/status
 $ ./build.sh
 $ docker ps -l
 CONTAINER ID        IMAGE                     COMMAND             CREATED             STATUS                     PORTS               NAMES
@@ -155,6 +158,49 @@ c04254e1715d        rossbachp/status:latest   "/bin/sh -c true"   6 seconds ago 
 
 ***
 App reported version of Tomcat, hostname and current date.
+
+-
+### Start Apache Tomcat 8 test container
+
+
+```bash
+$ docker run -tdi \
+ -e "SERVICE_NAME=app" \
+ --volumes-from status:ro \
+ -P rossbachp/tomcat8
+
+e2e2404b36ceb8226e0c723d18b7ea4a6d92134a79d042a6308fe4d36aea2503
+```
+
+-
+### check status
+
+```bash
+$ CID=$(docker ps -lq)
+$ IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
+$ curl http://$IP:8000/status/index.jsp
+<html>
+<body>
+<h1>Docker Tomcat Status page</h1>
+
+<ul>
+  <li>Hostname : a222c4e3f231</li>
+  <li>Tomcat Version : Apache Tomcat/8.0.11</li>
+  <li>Servlet Specification Version : 3.1</li>
+  <li>JSP version : 2.3</li>
+  <li>Now : 2014/11/02 17:38:32</li>
+</ul>
+</body>
+</html>
+```
+-
+### stop status tomcat
+
+```bash
+$ CID=$(docker ps -lq)
+$ docker stop $CID
+$ docker rm $CID
+```
 
 ---
 ## Register Tomcat Container
@@ -224,29 +270,6 @@ $ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
 
 ***
 [check Peter's Dockerbox tomcat 8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
-
--
--
-### check status
-
-```
-$ CID=$(docker ps -lq)
-$ IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
-$ curl http://$IP:8000/status/index.jsp
-<html>
-<body>
-<h1>Docker Tomcat Status page</h1>
-
-<ul>
-  <li>Hostname : a222c4e3f231</li>
-  <li>Tomcat Version : Apache Tomcat/8.0.11</li>
-  <li>Servlet Specification Version : 3.1</li>
-  <li>JSP version : 2.3</li>
-  <li>Now : 2014/11/02 17:38:32</li>
-</ul>
-</body>
-</html>
-```
 
 ---
 ## Apache Web Server
