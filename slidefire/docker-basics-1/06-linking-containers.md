@@ -15,17 +15,13 @@ CONTAINER ID        IMAGE               COMMAND                CREATED          
 f01e0624537d        nginx:latest        "nginx -g 'daemon of   About an hour ago   Up About a minute          443/tcp, 80/tcp     mynginx
 ```
 
+
 ## docker run --link
 
 ```
-$ docker run -it --link mynginx:web rossbachp/tomcat8 /bin/bash
 # Add link to another container in the form of name:alias
+$ docker run -it --link mynginx:web rossbachp/tomcat8 /bin/bash
 ```
-
-
-* `docker run [OPTIONS] IMAGE [COMMAND] [ARG...]`
-* `--name <name for a container``
-* `--link <container name>:<alias>``
 
 
 ## Excercise 6 

@@ -63,5 +63,3 @@ tail -f /tmp/thecontainerlogs/access.log
 2. Start the nginx image with `--volumes-from=<fist container>`
 3. Make a request and examine the logs
 4. Restart the nginx and check old log entries
-
-
