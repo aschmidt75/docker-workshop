@@ -4,7 +4,7 @@
 ( sudo gem list --local | grep -q rspec ) || {
 	sudo gem install rspec -v '2.99.0' --no-ri --no-rdoc
 }
-( sudo gem list --local | grep -q rspec -its) || {
+( sudo gem list --local | grep -q rspec-its) || {
 	sudo gem install rspec-its -v '1.0.0' --no-ri --no-rdoc
 }
 ( sudo gem list --local | grep -q specinfra ) || {
