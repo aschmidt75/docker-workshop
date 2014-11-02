@@ -1,5 +1,8 @@
 # 5) Volumes
 
+
+## Volumes
+
 * For persisted and shared data
 * A special directory that bypasses the Union File System
 * Volumes can be shared between containers
@@ -24,7 +27,6 @@ docker run -v <hostpath>:<containerpath> ...
 * To persist data, they must live outside of the container
   1. Use `-v <host>:<path>` to manually manage your volumes
   2. Use a separate container to store the data
-* 
 
 
 ## Excercise 5a
