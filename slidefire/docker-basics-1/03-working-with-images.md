@@ -81,12 +81,20 @@ $ docker commit 371e7819491f myimage
 e412662cb4d8376b3d78a202f78ff3b42980041fc067b6c1c12d67163b1e5435
 ```
 
-
 ## Excercise 3
 1. Start the nginx container with a bash
 2. Add an index.html to `/usr/share/nginx/html`
 3. Run the container and publish `-p 8080:80`
 4. Submit the changes to a new image and start it
+
+
+## Excercise 3b
+1. remove java images<br>
+`$ docker rmi 127.0.0.1:5000/dockerfile/java:oracle-java8`<br>
+`$ docker rmi 127.0.0.1:5000/dockerfile/java`
+
+2. pull docker image<br>
+`$ docker pull 127.0.0.1:5000/dockerfile/java:oracle-java8`
 
 <!--
 Solution
