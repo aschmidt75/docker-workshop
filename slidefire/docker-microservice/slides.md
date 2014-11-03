@@ -573,7 +573,7 @@ We need to create a worker.properties file to access tomcat from httpd.
 At the VM:
 
 ```bash
-$ cd /mnt/dynupd
+$ cd /data/mnt/dynupd
 
 $ ./gen-modjk-workers-etcd-registrator.sh
 $ cat /data/apache2-jk-config/workers.properties
@@ -614,7 +614,7 @@ $ docker run -tdi -e "SERVICE_NAME=app" --volumes-from status:ro \
 f7609e148ad1        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   5 seconds ago       Up 4 seconds        0.0.0.0:49155->8080/tcp, 0.0.0.0:49156->8009/tcp   sick_davinci
 e2e2404b36ce        127.0.0.1:5000/rossbachp/tomcat8:201408281657-squash   "/opt/tomcat/bin/tom   17 minutes ago      Up 17 minutes       0.0.0.0:49153->8009/tcp, 0.0.0.0:49154->8080/tcp   goofy_meitner
 
-$ cd /mnt/dynupd
+$ cd /data/mnt/dynupd
 $ ./gen-modjk-workers-etcd-registrator.sh
 $ cat /data/apache2-jk-config/workers.properties
 $ docker restart apache2
@@ -648,7 +648,7 @@ $ watch 'curl -s http://127.0.0.1:6000/status/index.jsp'
 ** PLEASE: Open up another shell **
 
 ```bash
-$ cd /mnt/dynupd
+$ cd /data/mnt/dynupd
 $ ./watch.sh
 ```
 
