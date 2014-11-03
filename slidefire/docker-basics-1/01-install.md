@@ -98,3 +98,9 @@ CONTAINER ID        IMAGE                         COMMAND                CREATED
 1. Check your Docker installation.
 2. Examine available Docker commands. 
 
+
+## More Information
+
+* Google! Everything get's outdated very fast.
+* http://www.dockerbook.com/
+* Cheat-sheet for commands:<br> https://github.com/wsargent/docker-cheat-sheet

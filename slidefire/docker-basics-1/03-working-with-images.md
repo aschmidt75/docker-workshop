@@ -81,14 +81,23 @@ $ docker commit 371e7819491f myimage
 e412662cb4d8376b3d78a202f78ff3b42980041fc067b6c1c12d67163b1e5435
 ```
 
+
 ## Excercise 3
+## Running containers
 1. Start the nginx container with a bash
+2. Check by browsing to localhost:8000
 2. Add an index.html to `/usr/share/nginx/html`
-3. Run the container and publish `-p 8080:80`
-4. Submit the changes to a new image and start it
+3. Run the container and publish container port 80 to 8000
 
 
 ## Excercise 3b
+## Save containers changes
+
+1. Submit the changes to a new image and start it
+
+
+## Excercise 3c
+## Pull new images
 1. remove java images<br>
 `$ docker rmi 127.0.0.1:5000/dockerfile/java:oracle-java8`<br>
 `$ docker rmi 127.0.0.1:5000/dockerfile/java`
@@ -99,19 +108,19 @@ e412662cb4d8376b3d78a202f78ff3b42980041fc067b6c1c12d67163b1e5435
 <!--
 Solution
 
-$ docker create --name mynginx -p 8080:80 nginx
+$ docker create --name mynginx -p 8000:80 nginx
 $ docker start -i mynginx
-# browse to localhost:8080
+# browse to localhost:8000
 # keep running open new terminal
 $ docker exec -it mynginx /bin/bash
 $ echo hello wjax > /usr/share/nginx/html/index.html
 # browse to localhost:8080
+
 $ docker diff mynginx
 # make image
 $ docker commit mynginx wjaxnginx
 $ docker images
 $ docker run -p 8080:80 wjaxnginx
-
 $ docker ps -a
 $ docker diff 39005338b8d1
 
