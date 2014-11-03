@@ -811,8 +811,12 @@ It´s up to you!
   * Real orchestration to coordinate process, resources, security and network access need more attention.
     - Check [CoreOS](http://www.coreos.com) or [Google Kubernetes](https://github.com/GoogleCloudPlatform/kubernetes)!
 
-***
-Many Thanks for following!
+---
+### Many Thanks for following!
+
+Start this presentation with
+  * `docker run -d -ti -p 8007:80 rossbachp/scale-tomcat-deck:wjax2014`
+  * `open http://<dockerhost>:8007/scale-tomcat-deck:wjax2014`
 
 Andreas & Peter
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-NAME=rossbachp/autoscaling-apache-tomcat-slides
+NAME=rossbachp/scale-tomcat-deck
 docker build -t="$NAME" .
 DATE=`date +'%Y%m%d%H%M'`
 ID=$(docker inspect -f "{{.Id}}" "$NAME")
