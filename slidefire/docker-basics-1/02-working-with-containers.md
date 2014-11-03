@@ -9,6 +9,9 @@ $ docker run ubuntu echo helloworld
 helloworld
 ```
 
+
+## docker run again
+
 ```
 # run an interactive command
 $ docker run -it ubuntu /bin/bash
@@ -60,7 +63,7 @@ $ docker stop mycontainer
 ```
 
 ```bash
-# Start a container (SIGTERM)
+# Start a container
 $ docker start mycontainer
 ```
 
@@ -98,7 +101,7 @@ $ docker inspect mycontainer
 
 ## Excercise 2a
 
-1. Print HelloWJax with a Docker container
+1. Print `hello-wjax with a Docker container
 2. Start a bash in a container and remove the `ls` command
 3. Start a background container with a while loop
 4. {Examine, stop, start} that container

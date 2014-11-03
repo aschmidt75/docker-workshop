@@ -1,8 +1,12 @@
-# WJAX Docker Workshop
+# Docker Getting Started 1 & 2
 
-<!--
-These are a couple of examples for a Docker workshop.
-Also see : https://github.com/wsargent/docker-cheat-sheet
-TODO overview
-TODO where to get help / more information
--->
+
+## Agenda
+
+1. Installation
+2. Working with containers
+3. Working with images
+4. Building images
+5. Working with volumes
+6. Linking containers
+

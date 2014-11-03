@@ -1,5 +1,8 @@
 # 5) Volumes
 
+
+## Volumes
+
 * For persisted and shared data
 * A special directory that bypasses the Union File System
 * Volumes can be shared between containers
@@ -7,7 +10,7 @@
 * Volumes persist until no containers uses them
 
 
-# docker run -v
+## docker run -v
 ```
 # also doable with VOLUME in your Dockerfile
 docker run -v <containerpath> ...
@@ -20,11 +23,10 @@ docker run -v <hostpath>:<containerpath> ...
 ## Volume container
 
 * Volumes live as long as a container uses them (running or stopped)
-  So they get deleted if you clean up your containers (`docker rm`).
+* They get deleted if you clean up your containers (`docker rm`).
 * To persist data, they must live outside of the container
   1. Use `-v <host>:<path>` to manually manage your volumes
   2. Use a separate container to store the data
-* 
 
 
 ## Excercise 5a
@@ -63,5 +65,3 @@ tail -f /tmp/thecontainerlogs/access.log
 2. Start the nginx image with `--volumes-from=<fist container>`
 3. Make a request and examine the logs
 4. Restart the nginx and check old log entries
-
-
