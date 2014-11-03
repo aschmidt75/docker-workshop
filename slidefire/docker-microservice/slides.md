@@ -821,3 +821,9 @@ follow our blog [infrabricks.de](http://www.infrabricks.de)
 
 @PRossbach
 @aschmidt75
+
+-
+## bee42 boarding time
+
+![bee a solution](images/bee42-boarding.png)
+Work with the beekeeper!
