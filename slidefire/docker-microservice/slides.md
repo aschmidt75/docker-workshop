@@ -1,9 +1,12 @@
-# Scaling Apache Tomcat in a Docker-based infrastructure
+## Scaling Apache Tomcat in a Docker-based infrastructure
 
 * [<andreas.schmidt@cassini.de>](mailto:andreas.schmidt@cassini.de)  |  @aschmidt75
 * [<peter.rossbach@bee42.com>](mailto:peter.rossbach@bee42.com)  |  @PRossbach
+
+![](images/ship-container-with-a-bee.png)
+
 ---
-## What we like to show
+## What we like to show?
 
   * Test the newest kids on the IT-block
   * Construct a microservice environment form scratch
@@ -36,13 +39,12 @@
 ### Definition of the axis
 
   * X-axis scaling
-    - X-axis scaling consists of running multiple copies of an application behind a load balancer
+    - running multiple copies of an application behind a load balancer
   * Y-axis scaling
-    - Unlike X-axis and Z-axis, which consist of running multiple, identical copies of the application
-    - Y-axis axis scaling splits the application into multiple, different services.
+    - Splits the application into multiple, different services.
     - Each service is responsible for one or more closely related functions.
   * Z-axis scaling
-    - When using Z-axis scaling each server runs an identical copy of the code.
+    - Scaling each server runs an identical copy of the code.
 -
 ### Example Architecture
 
@@ -116,7 +118,7 @@ sudo docker run --name=status rossbachp/status
 rm status.war
 ```
 ***
-  - we not used jar, simple zip!
+  - we don't use jar, simple zip!
   - simple JSP
 -
 ## status.jsp
@@ -146,7 +148,7 @@ java.text.DateFormat dateFormat =
 ### build test status webapp
 
 ```bash
-$ cd /mnt/docker.d/status
+$ cd /data/mnt/docker.d/status
 $ ./build.sh
 $ docker ps -l
 CONTAINER ID        IMAGE                     COMMAND             CREATED             STATUS                     PORTS               NAMES
@@ -156,8 +158,53 @@ c04254e1715d        rossbachp/status:latest   "/bin/sh -c true"   6 seconds ago 
 ***
 App reported version of Tomcat, hostname and current date.
 
+-
+### Start Apache Tomcat 8 test container
+
+
+```bash
+$ docker run -tdi \
+ -e "SERVICE_NAME=app" \
+ --volumes-from status:ro \
+ -P rossbachp/tomcat8
+
+e2e2404b36ceb8226e0c723d18b7ea4a6d92134a79d042a6308fe4d36aea2503
+```
+
+-
+### check status
+
+```bash
+$ CID=$(docker ps -lq)
+$ IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
+$ curl http://$IP:8000/status/index.jsp
+<html>
+<body>
+<h1>Docker Tomcat Status page</h1>
+
+<ul>
+  <li>Hostname : a222c4e3f231</li>
+  <li>Tomcat Version : Apache Tomcat/8.0.11</li>
+  <li>Servlet Specification Version : 3.1</li>
+  <li>JSP version : 2.3</li>
+  <li>Now : 2014/11/02 17:38:32</li>
+</ul>
+</body>
+</html>
+```
+-
+### Clean up
+
+```bash
+$ CID=$(docker ps -lq)
+$ docker stop $CID
+$ docker rm $CID
+```
+***
+  * stop tomcat container
+  * remove it
+
 ---
-## Register Tomcat Container
 ### Service Discovery with etcd and Registrator to scale out!
 
 ![](images/etcd-registrator-watch.png)
@@ -224,29 +271,6 @@ $ etcdctl get /tomcat8/app/docker-workshop:goofy_meitner:8009
 
 ***
 [check Peter's Dockerbox tomcat 8 project](https://github.com/rossbachp/dockerbox/tree/master/docker-images/tomcat8)
-
--
--
-### check status
-
-```
-$ CID=$(docker ps -lq)
-$ IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
-$ curl http://$IP:8000/status/index.jsp
-<html>
-<body>
-<h1>Docker Tomcat Status page</h1>
-
-<ul>
-  <li>Hostname : a222c4e3f231</li>
-  <li>Tomcat Version : Apache Tomcat/8.0.11</li>
-  <li>Servlet Specification Version : 3.1</li>
-  <li>JSP version : 2.3</li>
-  <li>Now : 2014/11/02 17:38:32</li>
-</ul>
-</body>
-</html>
-```
 
 ---
 ## Apache Web Server
@@ -676,10 +700,7 @@ $ exit
 
 ```bash
 $ CID=$(docker ps | grep apache2 | awk '/^[0-9a-f]/{print $1}')
-$ docker exec -ti $CID /bin/bash
-
-$ /bin/bash -c \
- "source /etc/apache2/envvars && exec /usr/sbin/apachectl graceful"
+$ docker exec $CID /usr/sbin/apache2ctl graceful
 ```
 
 Check jk-status at your docker-workshop host
@@ -740,6 +761,10 @@ while true; do
   docker exec apache2 /usr/sbin/apache2ctl graceful >/dev/null
 done
 ```
+***
+  - Support jkstatus
+  - use worker template
+
 -
 ## Exercices for you!
 
